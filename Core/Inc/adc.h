@@ -35,13 +35,14 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
-
+extern volatile int newData_thermistor;
+extern volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

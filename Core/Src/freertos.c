@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "thermistor.h"
+#include "shock_pot.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,6 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 osThreadId readTempTaskHandle;
+osThreadId readDistTaskHandle;
 osThreadId canTaskHandle;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
@@ -110,6 +112,10 @@ void MX_FREERTOS_Init(void) {
   /* add threads, ... */
   osThreadDef(readTempTask, StartReadTempTask, osPriorityNormal, 0, 512);
   readTempTaskHandle = osThreadCreate(osThread(readTempTask), NULL);
+
+  // Shock Pot Reading Thread
+  osThreadDef(readDistTask, StartReadDistTask, osPriorityNormal, 0, 512);
+  readTempTaskHandle = osThreadCreate(osThread(readDistTask), NULL);
 
   /* USER CODE END RTOS_THREADS */
 

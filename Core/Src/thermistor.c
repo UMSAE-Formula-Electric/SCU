@@ -28,7 +28,6 @@ double volatile temperatures[16];
 double volatile naturalLogR;
 double volatile temperature;
 double volatile R_NTC;
-volatile int newData = 0;
 
 void get_NTC_Resistance(double voltageReading){
 	if (voltageReading >= (vDD-0.1) || voltageReading <= 0){R_NTC = 0;}
@@ -45,19 +44,14 @@ double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIO
 	return temperature;
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-	newData = 1;
-}
-
 void StartReadTempTask(void const * argument){
 //	char msg[512];
 	char tempMsg[50];
 
 	for (;;){
 		HAL_ADC_Start_DMA(&hadc1, res, 16);
-		while(!newData) {}
-		newData = 0;
+		while(!newData_thermistor) {}
+		newData_thermistor = 0;
 
 		for(int i = 0; i < 16; i++) {
 			  temperatures[i] = getTemperature(ADC_TO_Voltage * res[i]);

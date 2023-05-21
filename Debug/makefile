@@ -64,8 +64,8 @@ all: main-build
 main-build: SCU.elf secondary-outputs
 
 # Tool invocations
-SCU.elf SCU.map: $(OBJS) $(USER_OBJS) D:\UMSAE\SCU\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "SCU.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\UMSAE\SCU\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="SCU.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+SCU.elf SCU.map: $(OBJS) $(USER_OBJS) /home/st-coding/Documents/Codebases/SCU/STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "SCU.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/st-coding/Documents/Codebases/SCU/STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="SCU.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
