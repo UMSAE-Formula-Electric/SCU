@@ -22,6 +22,7 @@
 
 /* USER CODE BEGIN 0 */
 uint32_t ADC_Readings[16];
+volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
 volatile int newData_thermistor = 0;
 /* USER CODE END 0 */
 
@@ -336,5 +337,6 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	newData_thermistor = 1;
+	newData_shock_pot = 1;
 }
 /* USER CODE END 1 */

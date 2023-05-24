@@ -37,6 +37,7 @@ extern ADC_HandleTypeDef hadc1;
 /* USER CODE BEGIN Private defines */
 extern uint32_t ADC_Readings[16];
 extern volatile int newData_thermistor;
+extern volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
