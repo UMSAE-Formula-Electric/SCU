@@ -47,7 +47,7 @@ double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIO
 
 void StartReadTempTask(void const * argument){
 //	char msg[512];
-//	char tempMsg[50];
+	char tempMsg[50];
 
 	for (;;){
 		HAL_ADC_Start_DMA(&hadc1, ADC_Readings, 16);
@@ -57,8 +57,8 @@ void StartReadTempTask(void const * argument){
 		for(int i = 0; i < 16; i++) {
 			  temperatures[i] = getTemperature(ADC_TO_Voltage * ADC_Readings[i]);
 		}
-		//sprintf(tempMsg, "Temperature: %f\r\n", temperatures[1]);
-//		HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+		sprintf(tempMsg, "Temperature: %f\r\n", temperatures[1]);
+		HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
 
 //		SD_Log(msg, -1);
 //		memset(msg, 0, sizeof msg);
