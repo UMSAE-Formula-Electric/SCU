@@ -12,6 +12,5 @@
 
 
 void StartReadTempTask(void const * argument);
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc);
 
 #endif /* THERMISTOR_H_ */
