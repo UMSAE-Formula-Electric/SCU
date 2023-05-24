@@ -19,7 +19,6 @@
 #include "task.h"
 
 // variables defined in thermistor.c
-extern uint32_t res[16];
 extern const double ADC_TO_Voltage;
 extern const float vDD;
 
@@ -75,21 +74,21 @@ void StartReadDistTask(void const * argument){
 
 	for (;;){
 
-		HAL_ADC_Start_DMA(&hadc1, res, 16);	// get values from ADC
+		HAL_ADC_Start_DMA(&hadc1, ADC_Readings, 16);	// get values from ADC
 		while(!newData_shock_pot) {}				// wait until ADC finishes conversion
 		newData_shock_pot = 0;					// reset ADC conversion flag
 
 		// calculate distances for each ADC channel
 		for(int i = 0; i < 16; i++) {
-			  voltages[i] = ADC_TO_Voltage * res[i];
+			  voltages[i] = ADC_TO_Voltage * ADC_Readings[i];
 			  dist[i] = getDistance(voltages[i]);
 			  sprintf(msgDist, "ADC %d %.5f \n", i, voltages[i]);
 			  strcat(msg,msgDist);
 		}
 
 		// add ADC channel 0 to message
-		sprintf(distMsg, "Distance: %f\r\n", dist[0]);
-		HAL_USART_Transmit(&husart1, (uint8_t *) distMsg, strlen(distMsg), 10);
+//		sprintf(distMsg, "Distance: %f\r\n", dist[0]);
+//		HAL_USART_Transmit(&husart1, (uint8_t *) distMsg, strlen(distMsg), 10);
 
 //		// log message to SD card
 //		SD_Log(msg, -1);
