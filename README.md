@@ -14,3 +14,12 @@ Sensor Control Unit
 Uses ADC1 to read the voltages and convert them to distances.
 
 [**Shock Pot Datasheet**](https://drive.google.com/file/d/1g9wjH6BT5--y21_IYlu2G4MbX3KbiAo5/view?usp=share_link)
+
+## Flowmeter
+Uses TIM12 Channel 1 (pin PB14) to capture the pulses from the flowmeter and determine the flowrate of the fluid in m^3/s.
+
+[**Flowmeter Datasheet**](https://drive.google.com/file/d/1eDgrtt3bu5jgN7wbFmfX5pk9RuAkB_hs/view?usp=share_link)
+
+[**Alternate Flowmeter Datasheet**](https://drive.google.com/file/d/1jgxNPx9BC58do8RVcqYU6hQfMw6DpTo8/view?usp=share_link)
+
+[**Flowmeter Setup Example**](https://drive.google.com/file/d/1NjP9FMI18lw6DNG9UNYPWaCROAbHNBPB/view?usp=share_link)
