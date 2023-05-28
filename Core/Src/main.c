@@ -21,12 +21,13 @@
 #include "cmsis_os.h"
 #include "adc.h"
 #include "dma.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "flowmeter.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,8 +93,11 @@ int main(void)
   MX_DMA_Init();
   MX_ADC1_Init();
   MX_USART1_Init();
+  MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
 
+
+  HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
