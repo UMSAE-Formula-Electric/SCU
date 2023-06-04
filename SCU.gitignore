@@ -4,12 +4,6 @@
 *.obj
 *.elf
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
 # Shared objects (inc. Windows DLLs)
 *.dll
 *.so
@@ -24,17 +18,9 @@
 *.x86_64
 *.hex
 
-# Misc
-*.map
-*.m
-*.png
-
-# Vagrant directory
-.vagrant/
-
 # Include makefiles
 !Makefile
 *~
 
-# Libraries
-/lib
+# Debug
+Debug/
