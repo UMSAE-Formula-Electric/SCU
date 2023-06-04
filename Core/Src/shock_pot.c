@@ -82,8 +82,8 @@ void StartReadDistTask(void const * argument){
 		for(int i = 0; i < 16; i++) {
 			  voltages[i] = ADC_TO_Voltage * ADC_Readings[i];
 			  dist[i] = getDistance(voltages[i]);
-			  sprintf(msgDist, "ADC %d %.5f \n", i, voltages[i]);
-			  strcat(msg,msgDist);
+//			  sprintf(msgDist, "ADC %d %.5f \n", i, voltages[i]);
+//			  strcat(msg,msgDist);
 		}
 
 		// add ADC channel 0 to message
