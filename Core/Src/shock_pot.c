@@ -67,10 +67,10 @@ double getDistance(double voltage){
 //			translates voltages into distance
 //*********************************************************************
 void StartReadDistTask(void const * argument){
-	char msg[512];
-	char msgDist[20];
+//	char msg[512];
+//	char msgDist[20];
 	float voltages[16];
-	char distMsg[50];
+//	char distMsg[50];
 
 	for (;;){
 
