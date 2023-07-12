@@ -2,6 +2,8 @@
 
 Sensor Control Unit
 
+[Documentation](https://docs.google.com/document/d/1yh-vWpTT_wejGpQy9ZQ7YVPmWP_CSU35yJfaNo2MAhA/edit?usp=drive_link)
+
 ## Thermistor
 
 [**Temperature Sensors Line Guide**](https://drive.google.com/file/d/1dFKre9OKWxstRY-8zY3tSeb5LHlalR9f/view?usp=drive_link)
