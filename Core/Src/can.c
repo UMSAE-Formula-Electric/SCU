@@ -21,6 +21,10 @@
 #include "can.h"
 
 /* USER CODE BEGIN 0 */
+#include <usart.h>
+#include <string.h>
+#include <stdio.h>
+
 CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               RxData[8];
 /* USER CODE END 0 */
@@ -67,6 +71,11 @@ void MX_CAN1_Init(void)
   sFilterConfig.SlaveStartFilterBank = 14;
 
   if(HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  if (HAL_CAN_Start(&hcan1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -135,7 +144,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 /* USER CODE BEGIN 1 */
 HAL_StatusTypeDef CAN_Polling(void)
 {
-	if (HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0) < 1)
+	int a = HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0);
+	if (a < 1)
 	{
 		return HAL_ERROR;
 	}
@@ -151,7 +161,7 @@ HAL_StatusTypeDef CAN_Polling(void)
 void StartCanTask(void const * argument)
 {
 //	imuState state;
-
+	char canMsg[40];
 	for (;;)
 	{
 		if (CAN_Polling() == HAL_OK)
@@ -162,9 +172,13 @@ void StartCanTask(void const * argument)
 				{
 					case IMU_ACCELERATION_CAN_EXT_ID:
 //						imuProcessAccelerationPacket(&state, RxData);
+						sprintf(canMsg, "IMU Acceleration Packet\r\n");
+						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
 						break;
 					case IMU_ANGULAR_RATE_CAN_EXT_ID:
 //						imuProcessAngularRatePacket(&state, RxData);
+						sprintf(canMsg, "IMU Angular Rate Packet\r\n");
+						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
 						break;
 				}
 			}
