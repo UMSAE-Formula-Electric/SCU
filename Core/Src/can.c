@@ -25,6 +25,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "IMU.h"
+
 CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               RxData[8];
 /* USER CODE END 0 */
@@ -161,7 +163,7 @@ HAL_StatusTypeDef CAN_Polling(void)
 void StartCanTask(void const * argument)
 {
 //	imuState state;
-	char canMsg[40];
+//	char canMsg[40];
 	for (;;)
 	{
 		if (CAN_Polling() == HAL_OK)
@@ -171,14 +173,16 @@ void StartCanTask(void const * argument)
 				switch (RxHeader.ExtId)
 				{
 					case IMU_ACCELERATION_CAN_EXT_ID:
+						queueAccelerationPacket(RxData);
 //						imuProcessAccelerationPacket(&state, RxData);
-						sprintf(canMsg, "IMU Acceleration Packet\r\n");
-						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
+//						sprintf(canMsg, "IMU Acceleration Packet\r\n");
+//						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
 						break;
 					case IMU_ANGULAR_RATE_CAN_EXT_ID:
+						queueAngularRatePacket(RxData);
 //						imuProcessAngularRatePacket(&state, RxData);
-						sprintf(canMsg, "IMU Angular Rate Packet\r\n");
-						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
+//						sprintf(canMsg, "IMU Angular Rate Packet\r\n");
+//						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
 						break;
 				}
 			}
