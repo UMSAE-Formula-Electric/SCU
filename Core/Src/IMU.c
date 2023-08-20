@@ -30,7 +30,7 @@ uint64_t dequeueAccelerationPacket();
 uint64_t dequeueAngularRatePacket();
 void processAccelerationPacket(uint64_t packet);
 void processAngularRatePacket(uint64_t packet);
-void printPacket(char *data_name, uint16_t x, uint16_t y, uint16_t z);
+void printPacket(char *data_name, float x, float y, float z);
 
 void bufferInit()
 {
@@ -50,7 +50,7 @@ int queueAccelerationPacket(uint8_t data[])
 {
 	// check if space in buffer
 	if ((acceleration_buffer.buf_wrap && acceleration_buffer.buf_end_pos < acceleration_buffer.buf_start_pos) ||
-		(!acceleration_buffer.buf_wrap && acceleration_buffer.buf_end_pos > acceleration_buffer.buf_start_pos))
+		(!acceleration_buffer.buf_wrap && acceleration_buffer.buf_end_pos >= acceleration_buffer.buf_start_pos))
 	{
 		// add packet **NOTE a packet is 8 bytes so we can just grab the 8 bytes at once (arrays are contiguous in memory)**
 		acceleration_buffer.queue[acceleration_buffer.buf_end_pos] = ((uint64_t*)data)[0];
@@ -75,7 +75,7 @@ int queueAngularRatePacket(uint8_t data[])
 {
 	// check if space in buffer
 	if ((angular_rate_buffer.buf_wrap && angular_rate_buffer.buf_end_pos < angular_rate_buffer.buf_start_pos) ||
-		(!angular_rate_buffer.buf_wrap && angular_rate_buffer.buf_end_pos > angular_rate_buffer.buf_start_pos))
+		(!angular_rate_buffer.buf_wrap && angular_rate_buffer.buf_end_pos >= angular_rate_buffer.buf_start_pos))
 	{
 		// add packet **NOTE a packet is 8 bytes so we can just grab the 8 bytes at once (arrays are contiguous in memory)**
 		angular_rate_buffer.queue[angular_rate_buffer.buf_end_pos] = ((uint64_t*)data)[0];
@@ -149,15 +149,15 @@ uint64_t dequeueAngularRatePacket()
 void processAccelerationPacket(uint64_t packet)
 {
 	uint16_t *data = NULL;
-	uint16_t x_acceleration;
-	uint16_t y_acceleration;
-	uint16_t z_acceleration;
+	float x_acceleration;
+	float y_acceleration;
+	float z_acceleration;
 
 	data = (uint16_t*) &packet;
 
-	y_acceleration = data[0];
-	x_acceleration = data[1];
-	z_acceleration = data[2];
+	y_acceleration = ((float)data[0] / 100) - 320;
+	x_acceleration = ((float)data[1] / 100) - 320;
+	z_acceleration = ((float)data[2] / 100) - 320;
 
 	printPacket("Acceleration", x_acceleration, y_acceleration, z_acceleration);
 }
@@ -165,22 +165,24 @@ void processAccelerationPacket(uint64_t packet)
 void processAngularRatePacket(uint64_t packet)
 {
 	uint16_t *data = NULL;
-	uint16_t x_angular_rate;
-	uint16_t y_angular_rate;
-	uint16_t z_angular_rate;
+	float x_angular_rate;
+	float y_angular_rate;
+	float z_angular_rate;
 
 	data = (uint16_t*) &packet;
 
-	y_angular_rate = data[0];
-	x_angular_rate = data[1];
-	z_angular_rate = data[2];
+	y_angular_rate = ((float)data[0] / 128) - 250;
+	x_angular_rate = ((float)data[1] / 128) - 250;
+	z_angular_rate = ((float)data[2] / 128) - 250;
 
 	printPacket("Angular Rate", x_angular_rate, y_angular_rate, z_angular_rate);
 }
 
-void printPacket(char *data_name, uint16_t x, uint16_t y, uint16_t z)
+void printPacket(char *data_name, float x, float y, float z)
 {
-	char tempMsg[256];
+	char tempMsg[512];
+
+	sprintf(tempMsg, "%s X: %f\r\n%s Y: %f\r\n%s Z: %f\r\n", data_name, x, data_name, y, data_name, z);
 
 	HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 20);
 }
