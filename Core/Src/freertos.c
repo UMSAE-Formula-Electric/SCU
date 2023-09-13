@@ -28,6 +28,8 @@
 #include "thermistor.h"
 #include "shock_pot.h"
 #include "flowmeter.h"
+#include "can.h"
+#include "IMU.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +52,8 @@
 osThreadId readTempTaskHandle;
 osThreadId readDistTaskHandle;
 osThreadId readFlowmeterTaskHandle;
-osThreadId canTaskHandle;
+osThreadId canReceiverTaskHandle;
+osThreadId imuPacketProcessHandle;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 
@@ -122,6 +125,14 @@ void MX_FREERTOS_Init(void) {
   // Flow Meter Reading Thread
   osThreadDef(readFlowmeterTask, StartGetFlowrateTask, osPriorityNormal, 0, 512);
   readFlowmeterTaskHandle = osThreadCreate(osThread(readFlowmeterTask), NULL);
+
+  // CAN Receiver Thread
+  osThreadDef(canReceiverTask, StartCanTask, osPriorityNormal, 0, 512);
+  canReceiverTaskHandle = osThreadCreate(osThread(canReceiverTask), NULL);
+
+  // IMU Packet Processing Thread
+  osThreadDef(imuPacketProcessTask, StartIMUPacketProcessTask, osPriorityNormal, 0, 512);
+  imuPacketProcessHandle = osThreadCreate(osThread(imuPacketProcessTask), NULL);
 
   /* USER CODE END RTOS_THREADS */
 
