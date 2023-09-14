@@ -30,6 +30,7 @@
 #include "flowmeter.h"
 #include "can.h"
 #include "IMU.h"
+#include "wheel_speed.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,6 +55,7 @@ osThreadId readDistTaskHandle;
 osThreadId readFlowmeterTaskHandle;
 osThreadId canReceiverTaskHandle;
 osThreadId imuPacketProcessHandle;
+osThreadId readWheelSpeedsHandle;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 
@@ -133,6 +135,10 @@ void MX_FREERTOS_Init(void) {
   // IMU Packet Processing Thread
   osThreadDef(imuPacketProcessTask, StartIMUPacketProcessTask, osPriorityNormal, 0, 512);
   imuPacketProcessHandle = osThreadCreate(osThread(imuPacketProcessTask), NULL);
+
+  // Flow Meter Reading Thread
+  osThreadDef(readWheelSpeedsTask, StartGetWheelSpeedTask, osPriorityNormal, 0, 512);
+  readWheelSpeedsHandle = osThreadCreate(osThread(readWheelSpeedsTask), NULL);
 
   /* USER CODE END RTOS_THREADS */
 

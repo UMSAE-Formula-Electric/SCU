@@ -11,40 +11,40 @@
 
 #include "flowmeter.h"
 
-volatile int pulse_count = 0;											// tracks number of rising edges from flowmeter
+//volatile int pulse_count = 0;											// tracks number of rising edges from flowmeter
 const int PPL = 2200;													// pulse per liter
 const int DELAY = 500;													// time in ms
 static const double conversionFactor = (1000/DELAY)*(1.0/1000.0);		// convert L/s to m^3/s
-
+extern volatile int flowmeter_pulse_count;
 
 // gets flowrate as m^3/s
 double calculateFlowrate(){
 	volatile double flowrate;
 
-	flowrate = pulse_count*conversionFactor/PPL;	// calculate flowrate
-	pulse_count = 0;								// reset pulse_count
+	flowrate = flowmeter_pulse_count*conversionFactor/PPL;	// calculate flowrate
+	flowmeter_pulse_count = 0;								// reset pulse_count
 
 	return flowrate;
 }
 
-// function called when timer interrupt occurs
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
-{
-	uint32_t ICValue;
-
-	// when interrupt is caused by timer 12
-	if(htim->Instance == TIM12)
-	{
-
-		ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-
-		// check if timer is initialized
-		if(ICValue != 0)
-		{
-			pulse_count++;	// increment pulse_count
-		}
-	}
-}
+//// function called when timer interrupt occurs
+//void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+//{
+//	uint32_t ICValue;
+//
+//	// when interrupt is caused by timer 12
+//	if(htim->Instance == TIM12)
+//	{
+//
+//		ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+//
+//		// check if timer is initialized
+//		if(ICValue != 0)
+//		{
+//			pulse_count++;	// increment pulse_count
+//		}
+//	}
+//}
 
 // calculates flowrate every DELAY ms
 void StartGetFlowrateTask(void const * argument){
