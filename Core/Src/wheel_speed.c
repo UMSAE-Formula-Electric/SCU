@@ -8,6 +8,7 @@
 //****************************************************
 
 #include "wheel_speed.h"
+#include "cmsis_os.h"
 
 // define statements
 #define WHEEL_DIAMETER		1							// In meters
@@ -35,11 +36,16 @@ void StartGetWheelSpeedTask(void const * argument){
 	volatile double FR_speed;
 
 	for (;;){
-		vTaskDelay(pdMS_TO_TICKS(DELAY));	// wait DELAY ms
+		osDelay(pdMS_TO_TICKS(DELAY));	// wait DELAY ms
 
 		// calculates wheel speeds
 		FL_speed = calculateWheelSpeed(wheel_FL_pulse_count);
 		FR_speed = calculateWheelSpeed(wheel_FR_pulse_count);
+
+		/* TODO SCU#35 */
+		/* Logging Starts */
+
+		/* Logging Ends */
 
 		// reset counts
 		wheel_FL_pulse_count = 0;

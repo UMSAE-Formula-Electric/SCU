@@ -10,6 +10,11 @@
 //***************************
 
 #include "flowmeter.h"
+#include "usart.h"
+#include "rtc.h"
+#include "cmsis_os.h"
+#include <string.h>
+#include <stdio.h>
 
 //volatile int pulse_count = 0;											// tracks number of rising edges from flowmeter
 const int PPL = 2200;													// pulse per liter
@@ -27,32 +32,24 @@ double calculateFlowrate(){
 	return flowrate;
 }
 
-//// function called when timer interrupt occurs
-//void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
-//{
-//	uint32_t ICValue;
-//
-//	// when interrupt is caused by timer 12
-//	if(htim->Instance == TIM12)
-//	{
-//
-//		ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-//
-//		// check if timer is initialized
-//		if(ICValue != 0)
-//		{
-//			pulse_count++;	// increment pulse_count
-//		}
-//	}
-//}
-
 // calculates flowrate every DELAY ms
 void StartGetFlowrateTask(void const * argument){
 	volatile double flowrate;
+	char tempMsg[50];
+	char* time;
 
 	for (;;){
-		vTaskDelay(pdMS_TO_TICKS(DELAY));	// wait DELAY ms
-
 		flowrate = calculateFlowrate();		// calculates flowrate
+
+		/* TODO SCU#35 */
+		/* Logging Starts */
+		time = get_time();
+		HAL_USART_Transmit(&husart1, (uint8_t *) time, strlen(time), 10);
+
+		sprintf(tempMsg, ",%f,,,,\r\n", flowrate);
+		HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+		/* Logging Ends */
+
+		osDelay(DELAY);
 	}
 }

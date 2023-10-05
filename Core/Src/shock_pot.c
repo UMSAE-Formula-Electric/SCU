@@ -12,6 +12,7 @@
 #include "shock_pot.h"
 #include "stdio.h"
 #include "adc.h"
+#include "cmsis_os.h"
 #include <usart.h>
 #include <stdio.h>
 #include <string.h>
@@ -40,26 +41,6 @@ double getDistance(double voltage){
 	return dist;
 }
 
-
-// callback entered after ADC conversion (in thermistor.c)
-//void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-//{
-//	newData = 1;
-//	double voltages[16];
-//	double dist[16];
-//	// Conversion Complete & DMA Transfer Complete As Well
-//	for(int i = 0; i < 16; i++) {
-//		res1[i] = 0;
-//	}
-//	HAL_ADC_Start_DMA(&hadc1, res1, 16);
-//
-//	for(int i = 0; i < 16; i++) {
-//		voltages[i] = ADC_TO_Voltage * res1[i];
-//		dist[i] = getDistance(voltages[i]);
-//		printf("%f", dist[i]);
-//	}
-//}
-
 //*********************************************************************
 // readDist_task
 //
@@ -73,29 +54,26 @@ void StartReadDistTask(void const * argument){
 	char distMsg[50];
 
 	for (;;){
+		if (newData_shock_pot == 1){
+			// calculate distances for each ADC channel
+			for(int i = 0; i < 16; i++) {
+				  voltages[i] = ADC_TO_Voltage * ADC_Readings[i];
+				  dist[i] = getDistance(voltages[i]);
+				  sprintf(msgDist, "ADC %d %.5f \n", i, voltages[i]);
+				  strcat(msg,msgDist);
+			}
 
-		HAL_ADC_Start_DMA(&hadc1, ADC_Readings, 16);	// get values from ADC
-		while(!newData_shock_pot) {}				// wait until ADC finishes conversion
-		newData_shock_pot = 0;					// reset ADC conversion flag
+			/* TODO SCU#35 */
+			/* Logging Starts */
+			// add ADC channel 0 to message
+			sprintf(distMsg, "Distance: %f\r\n", dist[0]);
+			HAL_USART_Transmit(&husart1, (uint8_t *) distMsg, strlen(distMsg), 10);
+			/* Logging Ends */
 
-		// calculate distances for each ADC channel
-		for(int i = 0; i < 16; i++) {
-			  voltages[i] = ADC_TO_Voltage * ADC_Readings[i];
-			  dist[i] = getDistance(voltages[i]);
-//			  sprintf(msgDist, "ADC %d %.5f \n", i, voltages[i]);
-//			  strcat(msg,msgDist);
+			newData_shock_pot = 0;					// reset ADC conversion flag
 		}
 
-		// add ADC channel 0 to message
-//		sprintf(distMsg, "Distance: %f\r\n", dist[0]);
-//		HAL_USART_Transmit(&husart1, (uint8_t *) distMsg, strlen(distMsg), 10);
-
-//		// log message to SD card
-//		SD_Log(msg, -1);
-//		memset(msg, 0, sizeof msg);
-//		memset(msgDist, 0, sizeof msgDist);
-
-		// wait 10ms
-		vTaskDelay(pdMS_TO_TICKS(10));
+		// wait 500ms
+		osDelay(500);
 	}
 }
