@@ -74,10 +74,9 @@ void StartReadTempTask(void const * argument){
 			sprintf(tempMsg, "%f\r\n", temperatures[3]);
 			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
 			/* Logging Ends */
-
-			newData_thermistor = 0;
 		}
 
+		newData_thermistor = 0;
 		osDelay(500);
 	}
 }
