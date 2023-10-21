@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "rtc.h"
+#include "stdio.h"
 
 /* USER CODE BEGIN 0 */
 
