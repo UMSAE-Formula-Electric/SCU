@@ -21,7 +21,8 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
-uint32_t ADC_Readings[16];
+volatile uint32_t ADC_Readings[16];
+int adc_channel_count = sizeof(ADC_Readings)/sizeof(ADC_Readings[0]);
 volatile int newData_shock_pot;	// flag to determine if the ADC has finished a read
 volatile int newData_thermistor = 0;
 /* USER CODE END 0 */
@@ -46,7 +47,7 @@ void MX_ADC1_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ENABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -55,7 +56,7 @@ void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 16;
-  hadc1.Init.DMAContinuousRequests = ENABLE;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
@@ -85,7 +86,6 @@ void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = 3;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -272,7 +272,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
     hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
     hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    hdma_adc1.Init.Mode = DMA_CIRCULAR;
+    hdma_adc1.Init.Mode = DMA_NORMAL;
     hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
     hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
@@ -338,5 +338,19 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	newData_thermistor = 1;
 	newData_shock_pot = 1;
+}
+
+void StartAdcDma(void const * argument)
+{
+  /* USER CODE BEGIN StartDefaultTask */
+	const int DELAY = 500;
+  /* Infinite loop */
+  for(;;)
+  {
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC_Readings, adc_channel_count);
+
+	osDelay(DELAY);
+  }
+  /* USER CODE END StartDefaultTask */
 }
 /* USER CODE END 1 */

@@ -10,6 +10,8 @@
 #include "stdio.h"
 #include "adc.h"
 #include "usart.h"
+#include "rtc.h"
+#include "cmsis_os.h"
 #include "stdio.h"
 #include "string.h"
 
@@ -46,22 +48,35 @@ double getTemperature(double voltageReading){		// USING STEINHART & HART EQUATIO
 }
 
 void StartReadTempTask(void const * argument){
-//	char msg[512];
 	char tempMsg[50];
+	char* time;
 
 	for (;;){
-		HAL_ADC_Start_DMA(&hadc1, ADC_Readings, 16);
-		while(!newData_thermistor) {}
-		newData_thermistor = 0;
+		if (newData_thermistor == 1) {
+			for(int i = 0; i < 16; i++) {
+				  temperatures[i] = getTemperature(ADC_TO_Voltage * ADC_Readings[i]);
+			}
 
-		for(int i = 0; i < 16; i++) {
-			  temperatures[i] = getTemperature(ADC_TO_Voltage * ADC_Readings[i]);
+			/* TODO SCU#35 */
+			/* Logging Starts */
+			time = get_time();
+			HAL_USART_Transmit(&husart1, (uint8_t *) time, strlen(time), 10);
+
+			sprintf(tempMsg, ",,%f,", temperatures[0]);
+			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+
+			sprintf(tempMsg, "%f,", temperatures[1]);
+			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+
+			sprintf(tempMsg, "%f,", temperatures[2]);
+			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+
+			sprintf(tempMsg, "%f\r\n", temperatures[3]);
+			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+			/* Logging Ends */
 		}
-		sprintf(tempMsg, "Temperature: %f\r\n", temperatures[1]);
-		HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
 
-//		SD_Log(msg, -1);
-//		memset(msg, 0, sizeof msg);
-		HAL_Delay(10);
+		newData_thermistor = 0;
+		osDelay(500);
 	}
 }

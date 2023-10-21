@@ -24,7 +24,7 @@
 #include <usart.h>
 #include <string.h>
 #include <stdio.h>
-
+#include "cmsis_os.h"
 #include "IMU.h"
 
 CAN_RxHeaderTypeDef   RxHeader;
@@ -185,8 +185,13 @@ void StartCanTask(void const * argument)
 //						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
 						break;
 				}
+				/* TODO SCU#35 */
+				/* Logging Starts */
+
+				/* Logging Ends */
 			}
 		}
+		osDelay(500);
 	}
 }
 /* USER CODE END 1 */

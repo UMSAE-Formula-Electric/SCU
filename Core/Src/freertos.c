@@ -58,6 +58,9 @@ osThreadId imuPacketProcessHandle;
 osThreadId readWheelSpeedsHandle;
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
+osThreadId readAdcTaskHandle;
+uint32_t readAdcTaskBuffer[ 512 ];
+osStaticThreadDef_t readAdcTaskControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -65,6 +68,7 @@ osThreadId defaultTaskHandle;
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
+extern void StartAdcDma(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -115,6 +119,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
+  /* definition and creation of readAdcTask */
+  osThreadStaticDef(readAdcTask, StartAdcDma, osPriorityNormal, 0, 512, readAdcTaskBuffer, &readAdcTaskControlBlock);
+  readAdcTaskHandle = osThreadCreate(osThread(readAdcTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   osThreadDef(readTempTask, StartReadTempTask, osPriorityNormal, 0, 512);
@@ -136,7 +144,7 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(imuPacketProcessTask, StartIMUPacketProcessTask, osPriorityNormal, 0, 512);
   imuPacketProcessHandle = osThreadCreate(osThread(imuPacketProcessTask), NULL);
 
-  // Flow Meter Reading Thread
+  // Wheel Speed Reading Thread
   osThreadDef(readWheelSpeedsTask, StartGetWheelSpeedTask, osPriorityNormal, 0, 512);
   readWheelSpeedsHandle = osThreadCreate(osThread(readWheelSpeedsTask), NULL);
 

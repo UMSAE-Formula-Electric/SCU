@@ -8,7 +8,7 @@
 //***************************
 
 #include "IMU.h"
-
+#include "cmsis_os.h"
 
 #define BUFFER_SIZE 128
 
@@ -159,7 +159,10 @@ void processAccelerationPacket(uint64_t packet)
 	x_acceleration = ((float)data[1] / 100) - 320;
 	z_acceleration = ((float)data[2] / 100) - 320;
 
+	/* TODO SCU#35 */
+	/* Logging Starts */
 	printPacket("Acceleration", x_acceleration, y_acceleration, z_acceleration);
+	/* Logging Ends */
 }
 
 void processAngularRatePacket(uint64_t packet)
@@ -175,7 +178,10 @@ void processAngularRatePacket(uint64_t packet)
 	x_angular_rate = ((float)data[1] / 128) - 250;
 	z_angular_rate = ((float)data[2] / 128) - 250;
 
+	/* TODO SCU#35 */
+	/* Logging Starts */
 	printPacket("Angular Rate", x_angular_rate, y_angular_rate, z_angular_rate);
+	/* Logging Ends */
 }
 
 void printPacket(char *data_name, float x, float y, float z)
@@ -200,5 +206,7 @@ void StartIMUPacketProcessTask(void const * argument)
 		packet = dequeueAngularRatePacket();
 		// need to check if packet valid
 		processAngularRatePacket(packet);
+
+		osDelay(500);
 	}
 }
