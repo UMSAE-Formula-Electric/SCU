@@ -31,6 +31,7 @@
 #include "can.h"
 #include "IMU.h"
 #include "wheel_speed.h"
+#include "sd_card.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,6 +57,7 @@ osThreadId readFlowmeterTaskHandle;
 osThreadId canReceiverTaskHandle;
 osThreadId imuPacketProcessHandle;
 osThreadId readWheelSpeedsHandle;
+
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 
@@ -139,6 +141,14 @@ void MX_FREERTOS_Init(void) {
   // Flow Meter Reading Thread
   osThreadDef(readWheelSpeedsTask, StartGetWheelSpeedTask, osPriorityNormal, 0, 512);
   readWheelSpeedsHandle = osThreadCreate(osThread(readWheelSpeedsTask), NULL);
+
+  // SD Card GateKeeper Thread
+  osThreadDef(gateKeeperTask, StartGateKeeperTask, osPriorityNormal, 0, 128);
+  gateKeeperTaskHandle = osThreadCreate(osThread(gateKeeperTask), NULL);
+
+  // SD Card Sync Thread
+  osThreadDef(syncTask, StartSyncTask, osPriorityNormal, 0, 128);
+  syncTaskHandle = osThreadCreate(osThread(syncTask), NULL);
 
   /* USER CODE END RTOS_THREADS */
 

@@ -1,0 +1,2 @@
+../Core/Src/flowmeter.c:21:8:calculateFlowrate	24	static
+../Core/Src/flowmeter.c:50:6:StartGetFlowrateTask	24	static
