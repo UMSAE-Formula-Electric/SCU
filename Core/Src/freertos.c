@@ -136,9 +136,9 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(readFlowmeterTask, StartGetFlowrateTask, osPriorityNormal, 0, 512);
   readFlowmeterTaskHandle = osThreadCreate(osThread(readFlowmeterTask), NULL);
 
-  // CAN Receiver Thread
-  osThreadDef(canReceiverTask, StartCanTask, osPriorityNormal, 0, 512);
-  canReceiverTaskHandle = osThreadCreate(osThread(canReceiverTask), NULL);
+//  // CAN Receiver Thread
+//  osThreadDef(canReceiverTask, StartCanTask, osPriorityNormal, 0, 512);
+//  canReceiverTaskHandle = osThreadCreate(osThread(canReceiverTask), NULL);
 
   // IMU Packet Processing Thread
   osThreadDef(imuPacketProcessTask, StartIMUPacketProcessTask, osPriorityNormal, 0, 512);

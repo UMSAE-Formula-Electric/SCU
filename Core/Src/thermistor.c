@@ -14,6 +14,7 @@
 #include "cmsis_os.h"
 #include "stdio.h"
 #include "string.h"
+#include "doLogging.h"
 
 // STEINHART & HART Equation Coefficients
 const double A = 1.2794639360 * pow(10, -3);
@@ -57,23 +58,27 @@ void StartReadTempTask(void const * argument){
 				  temperatures[i] = getTemperature(ADC_TO_Voltage * ADC_Readings[i]);
 			}
 
-			/* TODO SCU#35 */
-			/* Logging Starts */
-			time = get_time();
-			HAL_USART_Transmit(&husart1, (uint8_t *) time, strlen(time), 10);
+			/* TODO SCU#35 */ //done
+			if ((loggingMode == logUSART) || (loggingMode == logBoth)){
+				time = get_time();
+				HAL_USART_Transmit(&husart1, (uint8_t *) time, strlen(time), 10);
 
-			sprintf(tempMsg, ",,%f,", temperatures[0]);
-			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+				sprintf(tempMsg, ",,%f,", temperatures[0]);
+				HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
 
-			sprintf(tempMsg, "%f,", temperatures[1]);
-			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+				sprintf(tempMsg, "%f,", temperatures[1]);
+				HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
 
-			sprintf(tempMsg, "%f,", temperatures[2]);
-			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+				sprintf(tempMsg, "%f,", temperatures[2]);
+				HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
 
-			sprintf(tempMsg, "%f\r\n", temperatures[3]);
-			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
-			/* Logging Ends */
+				sprintf(tempMsg, "%f\r\n", temperatures[3]);
+				HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+			}
+			if((loggingMode == logSD) || (loggingMode == logBoth)){
+				//for SD logging
+			}
+
 		}
 
 		newData_thermistor = 0;

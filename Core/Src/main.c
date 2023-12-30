@@ -26,6 +26,8 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "string.h"
+#include "doLogging.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -61,7 +63,6 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -94,9 +95,12 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_ADC1_Init();
-  MX_USART1_Init();
+
+  if ((loggingMode == logUSART) || (loggingMode == logBoth)){
+	  MX_USART1_Init();
+  }
   MX_TIM12_Init();
-  MX_CAN1_Init();
+  //MX_CAN1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_RTC_Init();
@@ -108,7 +112,6 @@ int main(void)
 
   /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
-
   /* Start scheduler */
   osKernelStart();
 

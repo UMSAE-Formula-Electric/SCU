@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include "cmsis_os.h"
 #include "IMU.h"
+#include "doLogging.h"
 
 CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               RxData[8];
@@ -185,10 +186,10 @@ void StartCanTask(void const * argument)
 //						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
 						break;
 				}
-				/* TODO SCU#35 */
-				/* Logging Starts */
-
-				/* Logging Ends */
+				/* TODO SCU#35 */ //done
+				if ((loggingMode == logUSART) || (loggingMode == logBoth)){
+					HAL_USART_Transmit(&husart1, (uint8_t *) "Received message with extended ID.", strlen("Received message with extended ID."), 20);
+				}
 			}
 		}
 		osDelay(500);

@@ -18,6 +18,7 @@
 #include <string.h>
 #include "FreeRTOS.h"
 #include "task.h"
+#include "doLogging.h"
 
 // variables defined in thermistor.c
 extern const double ADC_TO_Voltage;
@@ -63,12 +64,15 @@ void StartReadDistTask(void const * argument){
 				  strcat(msg,msgDist);
 			}
 
-			/* TODO SCU#35 */
-			/* Logging Starts */
-			// add ADC channel 0 to message
-			sprintf(distMsg, "Distance: %f\r\n", dist[0]);
-			HAL_USART_Transmit(&husart1, (uint8_t *) distMsg, strlen(distMsg), 10);
-			/* Logging Ends */
+			/* TODO SCU#35 */ //done
+			if((loggingMode == logUSART) || (loggingMode == logBoth)){
+				// add ADC channel 0 to message
+				sprintf(distMsg, "Distance: %f\r\n", dist[0]);
+				HAL_USART_Transmit(&husart1, (uint8_t *) distMsg, strlen(distMsg), 10);
+			}
+			if((loggingMode == logSD) || (loggingMode == logBoth)){
+				//for SD logging
+			}
 
 			newData_shock_pot = 0;					// reset ADC conversion flag
 		}

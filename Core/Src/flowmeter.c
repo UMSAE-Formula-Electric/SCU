@@ -15,6 +15,7 @@
 #include "cmsis_os.h"
 #include <string.h>
 #include <stdio.h>
+#include "doLogging.h"
 
 //volatile int pulse_count = 0;											// tracks number of rising edges from flowmeter
 const int PPL = 2200;													// pulse per liter
@@ -41,13 +42,17 @@ void StartGetFlowrateTask(void const * argument){
 	for (;;){
 		flowrate = calculateFlowrate();		// calculates flowrate
 
-		/* TODO SCU#35 */
-		/* Logging Starts */
-		time = get_time();
-		HAL_USART_Transmit(&husart1, (uint8_t *) time, strlen(time), 10);
+		/* TODO SCU#35 */ //done
+		if ((loggingMode == logUSART) || (loggingMode == logBoth)){
+			time = get_time();
+			HAL_USART_Transmit(&husart1, (uint8_t *) time, strlen(time), 10);
 
-		sprintf(tempMsg, ",%f,,,,\r\n", flowrate);
-		HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+			sprintf(tempMsg, ",%f,,,,\r\n", flowrate);
+			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+		}
+		if((loggingMode == logSD) || (loggingMode == logBoth)){
+			//for SD logging
+		}
 		/* Logging Ends */
 
 		osDelay(DELAY);
