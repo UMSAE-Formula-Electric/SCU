@@ -316,7 +316,7 @@ void StartGateKeeperTask(void const * argument){
 	}//if mounted
 
 	f_res = f_mkdir(LOG_DIR_NAME);		// Make the directory if it hasn't been made
-	f_res = f_chdir(LOG_DIR_NAME);		// open the logs directory
+//	f_res = f_chdir(LOG_DIR_NAME);		// open the logs directory
 
 //	f_res = f_open(&fil[LogFile], LOG_FILE_NAME, FA_READ | FA_WRITE | FA_OPEN_APPEND); (blane's code)
 	f_res = f_open(&fil[LogFile], LOG_FILE_NAME, FA_READ | FA_WRITE | FA_OPEN_APPEND);

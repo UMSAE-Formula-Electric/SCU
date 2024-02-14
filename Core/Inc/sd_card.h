@@ -55,7 +55,7 @@ void xTest_Sender_Task1(void * pvParameters);
 void xTest_Sender_Task2(void * pvParameters);
 
 // SD Card osThread IDs
-osThreadId gateKeeperTaskHandle;
-osThreadId syncTaskHandle;
+static osThreadId gateKeeperTaskHandle;
+static osThreadId syncTaskHandle;
 
 #endif /* SD_CARD_H_ */
