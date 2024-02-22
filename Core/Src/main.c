@@ -23,14 +23,14 @@
 #include "can.h"
 #include "dma.h"
 #include "fatfs.h"
-#include "sdio.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdarg.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,7 +62,9 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint8_t isCardInserted() {
+    return HAL_GPIO_ReadPin(SD_CD_GPIO_Port, SD_CD_Pin) == GPIO_PIN_SET;
+}
 /* USER CODE END 0 */
 
 /**
@@ -97,15 +99,49 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_Init();
   MX_TIM12_Init();
-  MX_CAN1_Init();
+  // MX_CAN1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
-  MX_SDIO_SD_Init();
   MX_FATFS_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
+
+
+  // Junk for testing SD Card - Niko
+
+  //some variables for FatFs
+  FATFS FatFs; 	//Fatfs handle
+  FIL fil; 		//File handle
+  FRESULT fres; //Result after operations
+
+  while(fres != FR_OK) {
+	  while (!isCardInserted()) {
+		  HAL_Delay(100);
+	  }
+	  //Open the file system
+	  fres = f_mount(&FatFs, "", 1);
+  }
+
+  //Now let's try and write a file "write.txt"
+  fres = f_open(&fil, "write.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+
+  BYTE readBuf[30];
+  strncpy((char*)readBuf, "Niko is the best!!", 19);
+  UINT bytesWrote;
+  fres = f_write(&fil, readBuf, 19, &bytesWrote);
+  if(fres != FR_OK) {
+	__NOP();
+  }
+
+  //Be a tidy kiwi - don't forget to close your file!
+  f_close(&fil);
+
+  //We're done, so de-mount the drive
+  f_mount(NULL, "", 0);
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -146,13 +182,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 50;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 3;
-  RCC_OscInitStruct.PLL.PLLR = 2;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();

@@ -119,37 +119,6 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  osThreadDef(readTempTask, StartReadTempTask, osPriorityNormal, 0, 512);
-  readTempTaskHandle = osThreadCreate(osThread(readTempTask), NULL);
-
-  // Shock Pot Reading Thread
-  osThreadDef(readDistTask, StartReadDistTask, osPriorityNormal, 0, 512);
-  readTempTaskHandle = osThreadCreate(osThread(readDistTask), NULL);
-
-  // Flow Meter Reading Thread
-  osThreadDef(readFlowmeterTask, StartGetFlowrateTask, osPriorityNormal, 0, 512);
-  readFlowmeterTaskHandle = osThreadCreate(osThread(readFlowmeterTask), NULL);
-
-  // CAN Receiver Thread
-  osThreadDef(canReceiverTask, StartCanTask, osPriorityNormal, 0, 512);
-  canReceiverTaskHandle = osThreadCreate(osThread(canReceiverTask), NULL);
-
-  // IMU Packet Processing Thread
-  osThreadDef(imuPacketProcessTask, StartIMUPacketProcessTask, osPriorityNormal, 0, 512);
-  imuPacketProcessHandle = osThreadCreate(osThread(imuPacketProcessTask), NULL);
-
-  // Flow Meter Reading Thread
-  osThreadDef(readWheelSpeedsTask, StartGetWheelSpeedTask, osPriorityNormal, 0, 512);
-  readWheelSpeedsHandle = osThreadCreate(osThread(readWheelSpeedsTask), NULL);
-
-  // SD Card GateKeeper Thread
-  osThreadDef(gateKeeperTask, StartGateKeeperTask, osPriorityNormal, 0, 128);
-  gateKeeperTaskHandle = osThreadCreate(osThread(gateKeeperTask), NULL);
-
-  // SD Card Sync Thread
-  osThreadDef(syncTask, StartSyncTask, osPriorityNormal, 0, 128);
-  syncTaskHandle = osThreadCreate(osThread(syncTask), NULL);
-
   /* USER CODE END RTOS_THREADS */
 
 }
