@@ -356,7 +356,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	// when interrupt is caused by timer 3
 	if(htim->Instance == TIM3)
 	{
-
 		ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 
 		// check if timer is initialized
@@ -369,7 +368,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	// when interrupt is caused by timer 4
 	if(htim->Instance == TIM4)
 	{
-
 		ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 
 		// check if timer is initialized
