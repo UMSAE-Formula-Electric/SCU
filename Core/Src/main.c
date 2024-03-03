@@ -122,6 +122,7 @@ int main(void)
 
   sd_open_log_file();
 
+  /*
   for(int i = 0; i < 10; i++) {
 
       #define BUF_LEN 10
@@ -131,8 +132,9 @@ int main(void)
 
 	  sd_log_to_file(buff, BUF_LEN);
   }
+  */
 
-  log_error(BATTERY_VOLTAGE_LOW, None, NULL);
+  log_error(BATTERY_VOLTAGE_LOW, NONE, NULL);
 
 
   sd_eject();

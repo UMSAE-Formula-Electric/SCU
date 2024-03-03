@@ -1,5 +1,5 @@
 ../Core/Src/errors.c:13:9:datatype_to_size	4
 ../Core/Src/errors.c:36:6:log_can_msg	6
 ../Core/Src/errors.c:59:6:log_error	1
-../Core/Src/errors.c:65:6:log_warning	1
-../Core/Src/errors.c:69:6:log_info	1
+../Core/Src/errors.c:68:6:log_warning	1
+../Core/Src/errors.c:72:6:log_info	1
