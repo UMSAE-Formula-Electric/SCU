@@ -37,6 +37,11 @@ extern CAN_HandleTypeDef hcan1;
 /* USER CODE BEGIN Private defines */
 #define IMU_ACCELERATION_CAN_EXT_ID 0x8F02D80
 #define IMU_ANGULAR_RATE_CAN_EXT_ID 0xCF02A80
+#define CAN_ACU_CAN_ID				0x69
+#define CAN_VCU_CAN_ID				0x88
+#define CAN_SCU_CAN_ID				0x420
+#define CAN_AMS_CAN_ID          	0x70
+#define CAN_VCU_LOG_ID				0x71 //ID for sending VCU data to ACB
 /* USER CODE END Private defines */
 
 void MX_CAN1_Init(void);

@@ -24,7 +24,6 @@
 #include <usart.h>
 #include <string.h>
 #include <stdio.h>
-
 #include "IMU.h"
 
 CAN_RxHeaderTypeDef   RxHeader;
@@ -146,13 +145,14 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 /* USER CODE BEGIN 1 */
 HAL_StatusTypeDef CAN_Polling(void)
 {
-	int a = HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0);
-	if (a < 1)
+	uint32_t isCanRxFifoFilled = HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0);
+	if (isCanRxFifoFilled < 1)
 	{
 		return HAL_ERROR;
 	}
 
-	if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+    HAL_StatusTypeDef isCanMsgReceived = HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader, RxData);
+	if (isCanMsgReceived != HAL_OK)
 	{
 		return HAL_ERROR;
 	}
@@ -160,10 +160,31 @@ HAL_StatusTypeDef CAN_Polling(void)
 	return HAL_OK;
 }
 
+
+void nullTerminate(char *str) {
+    size_t length = strlen(str);
+    uint8_t isNullTerminated = str[length - 1] != '\0';
+    if (isNullTerminated == 0) {
+        str[length] = '\0';
+    }
+}
+
+void messageReceivedFromControlUnit(const char *unitType) {
+    char canMsg[50];
+    if (strcmp(unitType, "VCU") == 0) strncpy(canMsg, "SCU received a CAN message from the VCU.\r\n", sizeof(canMsg) - 1);
+    else if (strcmp(unitType, "ACU") == 0) strncpy(canMsg, "SCU received a CAN message from the ACU.\r\n", sizeof(canMsg) - 1);
+    else if (strcmp(unitType, "SCU") == 0) strncpy(canMsg, "SCU received a CAN message from the SCU.\r\n", sizeof(canMsg) - 1);
+    nullTerminate(canMsg);
+    HAL_USART_Transmit(&husart1, (uint8_t *)canMsg, strlen(canMsg), 10);
+    strncpy(canMsg, (char *) RxData, RxHeader.DLC);
+    nullTerminate(canMsg);
+    HAL_USART_Transmit(&husart1, (uint8_t *)canMsg, strlen(canMsg), 10);
+}
+
 void StartCanTask(void const * argument)
 {
 //	imuState state;
-//	char canMsg[40];
+	char canMsg[50];
 	for (;;)
 	{
 		if (CAN_Polling() == HAL_OK)
@@ -184,6 +205,18 @@ void StartCanTask(void const * argument)
 //						sprintf(canMsg, "IMU Angular Rate Packet\r\n");
 //						HAL_USART_Transmit(&husart1, (uint8_t *) canMsg, strlen(canMsg)+1, 10);
 						break;
+				}
+			}
+			if (RxHeader.IDE == CAN_ID_STD)
+			{
+				switch (RxHeader.ExtId)
+				{
+					case CAN_VCU_CAN_ID:
+                        messageReceivedFromControlUnit("VCU");
+                    case CAN_ACU_CAN_ID:
+                        messageReceivedFromControlUnit("ACU");
+                    case CAN_SCU_CAN_ID:
+                        messageReceivedFromControlUnit("SCU");
 				}
 			}
 		}
