@@ -27,3 +27,4 @@ Debug
 cmake-build-*
 
 .idea
+.settings
