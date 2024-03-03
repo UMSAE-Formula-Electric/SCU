@@ -59,8 +59,12 @@ bool log_can_msg(uint8_t *can_data) {
 bool log_error(ERR_TABLE error_type, DataType data_type, uint8_t *data) {
 	LogLevel log_level = Error;	// Error
 
-	char *test_log = "Testing";
-	sd_log_to_file(test_log, 8);
+	static const uint8_t BUF_SIZE = 32;
+	static char to_log[32];
+
+	snprintf(to_log, BUF_SIZE, "%d %d %d\n", log_level, error_type, data_type);
+
+	sd_log_to_file(to_log, BUF_SIZE);
 
 	return true;
 }
