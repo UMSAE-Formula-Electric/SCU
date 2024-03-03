@@ -213,10 +213,13 @@ void StartCanTask(void const * argument)
 				{
 					case CAN_VCU_CAN_ID:
                         messageReceivedFromControlUnit("VCU");
+                        break;
                     case CAN_ACU_CAN_ID:
                         messageReceivedFromControlUnit("ACU");
+                        break;
                     case CAN_SCU_CAN_ID:
                         messageReceivedFromControlUnit("SCU");
+                        break;
 				}
 			}
 		}
