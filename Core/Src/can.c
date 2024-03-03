@@ -1,3 +1,4 @@
+
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -195,3 +196,4 @@ void StartCanTask(void const * argument)
 	}
 }
 /* USER CODE END 1 */
+

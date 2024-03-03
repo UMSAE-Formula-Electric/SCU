@@ -1,0 +1,2 @@
+../Core/Src/wheel_speed.c:26:8:calculateWheelSpeed	24	static
+../Core/Src/wheel_speed.c:34:6:StartGetWheelSpeedTask	32	static

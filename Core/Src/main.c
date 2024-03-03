@@ -23,13 +23,19 @@
 #include "can.h"
 #include "dma.h"
 #include "rtc.h"
+#include "fatfs.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
+#include "errors.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdarg.h>
+#include <stdio.h>
+#include "sd_card2.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,7 +67,11 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+/*
+uint8_t isCardInserted() {
+    return HAL_GPIO_ReadPin(SD_CD_GPIO_Port, SD_CD_Pin) == GPIO_PIN_SET;
+}
+*/
 /* USER CODE END 0 */
 
 /**
@@ -96,14 +106,36 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_Init();
   MX_TIM12_Init();
-  MX_CAN1_Init();
+  // MX_CAN1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_RTC_Init();
+  MX_FATFS_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
+  // Init_SD_Card();
+
+  sd_mount();
+
+  sd_open_log_file();
+
+  for(int i = 0; i < 10; i++) {
+
+      #define BUF_LEN 10
+	  char buff[BUF_LEN];
+
+	  snprintf(buff, BUF_LEN, "Test: %d\n", i);
+
+	  sd_log_to_file(buff, BUF_LEN);
+  }
+
+  log_error(BATTERY_VOLTAGE_LOW, None, NULL);
+
+
+  sd_eject();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
