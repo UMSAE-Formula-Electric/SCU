@@ -31,6 +31,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdarg.h>
+#include <stdio.h>
+#include "sd_card2.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,9 +64,11 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/*
 uint8_t isCardInserted() {
     return HAL_GPIO_ReadPin(SD_CD_GPIO_Port, SD_CD_Pin) == GPIO_PIN_SET;
 }
+*/
 /* USER CODE END 0 */
 
 /**
@@ -108,40 +112,23 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
+  // Init_SD_Card();
 
+  while(sd_mount() != FR_OK);
+  while(sd_open_log_file() != FR_OK);
 
-  // Junk for testing SD Card - Niko
+  for(int i = 0; i < 10; i++) {
 
-  //some variables for FatFs
-  FATFS FatFs; 	//Fatfs handle
-  FIL fil; 		//File handle
-  FRESULT fres; //Result after operations
+      #define BUF_LEN 9
+	  char buff[BUF_LEN];
 
-  while(fres != FR_OK) {
-	  while (!isCardInserted()) {
-		  HAL_Delay(100);
-	  }
-	  //Open the file system
-	  fres = f_mount(&FatFs, "", 1);
+	  snprintf(buff, BUF_LEN, "Test: %d\n", i);
+
+	  sd_log_to_file(buff, BUF_LEN);
   }
 
-  //Now let's try and write a file "write.txt"
-  fres = f_open(&fil, "write.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
 
-  BYTE readBuf[30];
-  strncpy((char*)readBuf, "Niko is the best!!", 19);
-  UINT bytesWrote;
-  fres = f_write(&fil, readBuf, 19, &bytesWrote);
-  if(fres != FR_OK) {
-	__NOP();
-  }
-
-  //Be a tidy kiwi - don't forget to close your file!
-  f_close(&fil);
-
-  //We're done, so de-mount the drive
-  f_mount(NULL, "", 0);
-
+  while(sd_eject() != FR_OK);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

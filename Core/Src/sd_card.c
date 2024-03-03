@@ -361,7 +361,7 @@ void StartGateKeeperTask(void const * argument){
 					for(int i=0; i<FS_MAX_CONCURRENT_FILES; i++){
 						f_close(&fil[i]);
 					}
-					f_mount(0,"",0);	//unmount the fs
+					f_mount(NULL, "" ,0);	//unmount the fs
 					vTaskSuspend(gateKeeperTaskHandle);	// Suspend this task
 					break;
 				default:
