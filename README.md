@@ -25,3 +25,14 @@ Uses TIM12 Channel 1 (pin PB14) to capture the pulses from the flowmeter and det
 [**Alternate Flowmeter Datasheet**](https://drive.google.com/file/d/1jgxNPx9BC58do8RVcqYU6hQfMw6DpTo8/view?usp=share_link)
 
 [**Flowmeter Setup Example**](https://drive.google.com/file/d/1NjP9FMI18lw6DNG9UNYPWaCROAbHNBPB/view?usp=share_link)
+
+## CLion
+How to get SCU working with CLion?
+1. Open the SCU.ioc file as a project in CLion.
+2. Choose the Board config to be: stm32f4discovery.cfg
+3. In the CMakeLists.txt, uncomment these lines:
+```cmake
+add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
+add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+```

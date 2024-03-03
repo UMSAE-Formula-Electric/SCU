@@ -23,4 +23,7 @@
 *~
 
 # Debug
-Debug/
+Debug
+cmake-build-*
+
+.idea
