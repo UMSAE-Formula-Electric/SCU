@@ -13,9 +13,7 @@ FATFS FatFs; 	//Fatfs handle
 FIL logFile; 	//File handle
 
 FRESULT sd_mount(void) {
-	FRESULT fres = FR_NOT_READY;
-	fres = f_mount(&FatFs, "", 1);
-	return fres;
+	return f_mount(&FatFs, "", 1);
 }
 
 FRESULT sd_open_log_file(void) {
