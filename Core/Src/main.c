@@ -104,7 +104,7 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_Init();
   MX_TIM12_Init();
-  MX_CAN1_Init();
+  //MX_CAN1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_FATFS_Init();
@@ -124,15 +124,23 @@ int main(void)
 
   //char start_time[20] = get_time();
 
-  for(int i = 0; i < 100000; i++) {
-	#define BUF_LEN 33
+  for(int i = 0; i < 100; i++) {
+	#define BUF_LEN 21
 	char buff[BUF_LEN];
 
 	//uint32_t length = snprintf(buff, BUF_LEN, "Test: %d\n", i) + 1;
 
 	uint32_t length = snprintf(buff, BUF_LEN, get_time()) + 1;
 
+	buff[length - 1] = '\n';
+
 	sd_log_to_file(buff, length);
+
+	length = snprintf(buff, BUF_LEN, "%f\n", 333.333f) + 1;
+	// buff[length - 1] = '\n';
+
+	sd_log_to_file(buff, length);
+
 	//log_error(BATTERY_VOLTAGE_LOW, NONE, NULL);
   }
 

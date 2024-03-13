@@ -1,0 +1,5 @@
+../Core/Src/adc.c:34:6:MX_ADC1_Init	24	static
+../Core/Src/adc.c:216:6:HAL_ADC_MspInit	56	static
+../Core/Src/adc.c:291:6:HAL_ADC_MspDeInit	16	static
+../Core/Src/adc.c:337:6:HAL_ADC_ConvCpltCallback	16	static
+../Core/Src/adc.c:343:6:StartAdcDma	24	static

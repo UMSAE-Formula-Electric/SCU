@@ -1,0 +1,2 @@
+../Core/Src/shock_pot.c:39:8:getDistance	32	static
+../Core/Src/shock_pot.c:50:6:StartReadDistTask	680	static

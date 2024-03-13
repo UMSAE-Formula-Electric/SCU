@@ -1,0 +1,5 @@
+../Core/Src/can.c:37:6:MX_CAN1_Init	48	static
+../Core/Src/can.c:93:6:HAL_CAN_MspInit	48	static
+../Core/Src/can.c:123:6:HAL_CAN_MspDeInit	16	static
+../Core/Src/can.c:147:19:CAN_Polling	16	static
+../Core/Src/can.c:163:6:StartCanTask	16	static
