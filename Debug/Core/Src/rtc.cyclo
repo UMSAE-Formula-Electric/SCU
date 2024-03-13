@@ -1,2 +1,0 @@
-../Core/Src/rtc.c:31:6:MX_RTC_Init	1
-../Core/Src/rtc.c:138:7:get_time	1

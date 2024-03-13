@@ -1,9 +1,0 @@
-../Core/Src/IMU.c:35:6:bufferInit	4	static
-../Core/Src/IMU.c:49:5:queueAccelerationPacket	16	static
-../Core/Src/IMU.c:74:5:queueAngularRatePacket	16	static
-../Core/Src/IMU.c:99:10:dequeueAccelerationPacket	16	static
-../Core/Src/IMU.c:124:10:dequeueAngularRatePacket	16	static
-../Core/Src/IMU.c:149:6:processAccelerationPacket	32	static
-../Core/Src/IMU.c:168:6:processAngularRatePacket	32	static
-../Core/Src/IMU.c:187:6:printPacket	592	static
-../Core/Src/IMU.c:196:6:StartIMUPacketProcessTask	24	static

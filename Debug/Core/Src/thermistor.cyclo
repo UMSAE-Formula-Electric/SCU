@@ -1,3 +1,0 @@
-../Core/Src/thermistor.c:34:6:get_NTC_Resistance	3
-../Core/Src/thermistor.c:40:8:getTemperature	2
-../Core/Src/thermistor.c:50:6:StartReadTempTask	3

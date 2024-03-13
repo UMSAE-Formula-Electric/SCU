@@ -118,26 +118,30 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
   // Init_SD_Card();
 
-  sd_mount();
+  FRESULT fres_mount = sd_mount();
 
-  sd_open_log_file();
+  // DSTATUS dres = disk_status(0);
 
-  /*
-  for(int i = 0; i < 10; i++) {
+  FRESULT fres_open_file = sd_open_log_file();
 
-      #define BUF_LEN 10
-	  char buff[BUF_LEN];
+  //char start_time[20] = get_time();
 
-	  snprintf(buff, BUF_LEN, "Test: %d\n", i);
+  for(int i = 0; i < 100000; i++) {
+	#define BUF_LEN 33
+	char buff[BUF_LEN];
 
-	  sd_log_to_file(buff, BUF_LEN);
+	//uint32_t length = snprintf(buff, BUF_LEN, "Test: %d\n", i) + 1;
+
+	uint32_t length = snprintf(buff, BUF_LEN, get_time()) + 1;
+
+	sd_log_to_file(buff, length);
+	//log_error(BATTERY_VOLTAGE_LOW, NONE, NULL);
   }
-  */
 
-  log_error(BATTERY_VOLTAGE_LOW, NONE, NULL);
-
+  //char end_time[20] = get_time();
 
   sd_eject();
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */

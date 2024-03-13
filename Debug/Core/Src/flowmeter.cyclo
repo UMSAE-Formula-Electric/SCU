@@ -1,2 +1,0 @@
-../Core/Src/flowmeter.c:26:8:calculateFlowrate	1
-../Core/Src/flowmeter.c:36:6:StartGetFlowrateTask	1

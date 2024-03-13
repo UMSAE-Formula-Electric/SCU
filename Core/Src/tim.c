@@ -390,4 +390,9 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		}
 	}
 }
+
+uint32_t Get_TIM(void) {
+	return wheel_FR_pulse_count;
+}
+
 /* USER CODE END 1 */
