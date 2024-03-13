@@ -19,7 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "adc.h"
-#include "cmsis_os.h"
+
 /* USER CODE BEGIN 0 */
 volatile uint32_t ADC_Readings[16];
 int adc_channel_count = sizeof(ADC_Readings)/sizeof(ADC_Readings[0]);

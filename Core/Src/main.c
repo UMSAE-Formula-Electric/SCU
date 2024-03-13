@@ -22,14 +22,12 @@
 #include "adc.h"
 #include "can.h"
 #include "dma.h"
-#include "rtc.h"
 #include "fatfs.h"
+#include "rtc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
-#include "errors.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -106,12 +104,12 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_Init();
   MX_TIM12_Init();
-  // MX_CAN1_Init();
+  MX_CAN1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
-  MX_RTC_Init();
   MX_FATFS_Init();
   MX_SPI1_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); 		// Start input capture

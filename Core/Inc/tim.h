@@ -46,8 +46,6 @@ void MX_TIM3_Init(void);
 void MX_TIM4_Init(void);
 void MX_TIM12_Init(void);
 
-uint32_t Get_TIM(void); // for sd card, temporary
-
 /* USER CODE BEGIN Prototypes */
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
 /* USER CODE END Prototypes */
