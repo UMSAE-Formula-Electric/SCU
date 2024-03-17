@@ -104,7 +104,7 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_Init();
   MX_TIM12_Init();
-  //MX_CAN1_Init();
+  MX_CAN1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_FATFS_Init();
