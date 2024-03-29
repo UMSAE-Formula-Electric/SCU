@@ -117,12 +117,15 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
   // Init_SD_Card();
+  sd_init();
 
+  /*
   FRESULT fres_mount = sd_mount();
 
   // DSTATUS dres = disk_status(0);
 
   FRESULT fres_open_file = sd_open_log_file();
+  */
 
   //char start_time[20] = get_time();
 

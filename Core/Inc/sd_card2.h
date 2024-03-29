@@ -10,6 +10,7 @@
 
 #include "fatfs.h"
 
+FRESULT sd_init(void);
 FRESULT sd_mount(void);
 FRESULT sd_open_log_file(void);
 FRESULT sd_log_to_file(char*, UINT);

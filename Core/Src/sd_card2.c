@@ -19,6 +19,13 @@ FIL logFile; 	//File handle
 uint32_t write_count = 0; // how many writes have occured since we've synced them
 uint32_t log_index = 0;
 
+uint32_t sd_is_filename_free(char *filename) {
+	FILINFO info;
+	FRESULT fres = f_stat(filename, &info);
+
+	return fres == FR_NO_FILE;
+}
+
 FRESULT sd_mount(void) {
 	return f_mount(&FatFs, "", 1);
 }
@@ -28,11 +35,27 @@ FRESULT sd_open_log_file(void) {
 
 	char LOG_BUFFER[64] = {0};
 
-	snprintf(LOG_BUFFER, 64, LOG_FILE, log_index++);
+	do {
+		LOG_BUFFER[0] = '\0';
+		snprintf(LOG_BUFFER, 64, LOG_FILE, log_index++);
+	}while(!sd_is_filename_free(LOG_BUFFER));
+
 	fres = f_open(&logFile, LOG_BUFFER, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
 
 	return fres;
 }
+
+
+FRESULT sd_init(void) {
+	FRESULT fres = sd_mount();
+
+	if(fres == FR_OK) {
+		fres = sd_open_log_file();
+	}
+
+	return fres;
+}
+
 
 FRESULT sd_log_to_file(char *buff, UINT n) {
 	UINT bytesWritten;

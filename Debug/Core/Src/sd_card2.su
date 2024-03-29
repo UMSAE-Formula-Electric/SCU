@@ -1,4 +1,6 @@
-../Core/Src/sd_card2.c:22:9:sd_mount	8	static
-../Core/Src/sd_card2.c:26:9:sd_open_log_file	80	static
-../Core/Src/sd_card2.c:37:9:sd_log_to_file	24	static
-../Core/Src/sd_card2.c:64:9:sd_eject	16	static
+../Core/Src/sd_card2.c:22:10:sd_is_filename_free	48	static
+../Core/Src/sd_card2.c:29:9:sd_mount	8	static
+../Core/Src/sd_card2.c:33:9:sd_open_log_file	80	static
+../Core/Src/sd_card2.c:49:9:sd_init	16	static
+../Core/Src/sd_card2.c:60:9:sd_log_to_file	24	static
+../Core/Src/sd_card2.c:87:9:sd_eject	16	static
