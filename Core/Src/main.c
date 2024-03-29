@@ -130,16 +130,7 @@ int main(void)
 	#define BUF_LEN 21
 	char buff[BUF_LEN];
 
-	//uint32_t length = snprintf(buff, BUF_LEN, "Test: %d\n", i) + 1;
-
-	//uint32_t length = snprintf(buff, BUF_LEN, get_time()) + 1;
-
-	//buff[length - 1] = '\n';
-
-	//sd_log_to_file(buff, length);
-
 	uint32_t length = snprintf(buff, BUF_LEN, "%f\n", 333.333f) + 1;
-	// buff[length - 1] = '\n';
 
 	sd_log_to_file(buff, length);
 

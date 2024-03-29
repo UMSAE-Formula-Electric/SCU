@@ -450,14 +450,16 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	uint32_t ICValue;
 
+	/*
 	if (htim->Instance == TIM11) {
 		ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 
 		// check if timer is initialized
 		if(ICValue != 0) {
-			// sd_switch_log();
+			 sd_switch_log();
 		}
 	}
+	*/
 
 	// when interrupt is caused by timer 3
 	if(htim->Instance == TIM3)
