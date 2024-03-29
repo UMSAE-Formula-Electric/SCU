@@ -1,4 +1,5 @@
-../Core/Src/sd_card2.c:15:9:sd_mount	1
-../Core/Src/sd_card2.c:19:9:sd_open_log_file	1
-../Core/Src/sd_card2.c:25:9:sd_log_to_file	1
-../Core/Src/sd_card2.c:31:9:sd_eject	2
+../Core/Src/sd_card2.c:19:9:sd_mount	1
+../Core/Src/sd_card2.c:23:9:sd_open_log_file	1
+../Core/Src/sd_card2.c:34:9:sd_log_to_file	1
+../Core/Src/sd_card2.c:41:9:sd_switch_log	2
+../Core/Src/sd_card2.c:52:9:sd_eject	2

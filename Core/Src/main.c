@@ -104,14 +104,15 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_Init();
   MX_TIM12_Init();
-  MX_CAN1_Init();
+//  MX_CAN1_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_FATFS_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-  MX_TIM2_Init();
+  MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_IC_Start_IT(&htim11, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
@@ -147,7 +148,7 @@ int main(void)
 
   //char end_time[20] = get_time();
 
-  sd_eject();
+//  sd_eject();
 
   /* USER CODE END 2 */
 
