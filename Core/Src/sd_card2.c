@@ -10,10 +10,12 @@
 
 #define LOG_FILE "LOG_%u.txt"
 
+#define WRITES_UNTIL_SYNC 100
+
 FATFS FatFs; 	//Fatfs handle
 FIL logFile; 	//File handle
 
-
+uint32_t write_count = 0;
 uint32_t log_index = 0;
 
 FRESULT sd_mount(void) {
@@ -34,9 +36,17 @@ FRESULT sd_open_log_file(void) {
 FRESULT sd_log_to_file(char *buff, UINT n) {
 	UINT bytesWritten;
 	FRESULT fres = f_write(&logFile, buff, n, &bytesWritten);
+
+	if(fres == FR_OK) {
+		write_count++;
+		if(write_count % WRITES_UNTIL_SYNC == 0) { // check if time to sync
+			f_sync(&logFile);
+			write_count = 0;
+		}
+	}
+
 	return fres;
 }
-
 
 FRESULT sd_switch_log(void) {
 	FRESULT fres = f_close(&logFile);
@@ -47,7 +57,6 @@ FRESULT sd_switch_log(void) {
 
 	return fres;
 }
-
 
 FRESULT sd_eject(void) {
 	FRESULT fres = f_close(&logFile);

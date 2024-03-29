@@ -126,19 +126,19 @@ int main(void)
 
   //char start_time[20] = get_time();
 
-  for(int i = 0; i < 100; i++) {
+  for(int i = 0; i < 1910; i++) {
 	#define BUF_LEN 21
 	char buff[BUF_LEN];
 
 	//uint32_t length = snprintf(buff, BUF_LEN, "Test: %d\n", i) + 1;
 
-	uint32_t length = snprintf(buff, BUF_LEN, get_time()) + 1;
+	//uint32_t length = snprintf(buff, BUF_LEN, get_time()) + 1;
 
-	buff[length - 1] = '\n';
+	//buff[length - 1] = '\n';
 
-	sd_log_to_file(buff, length);
+	//sd_log_to_file(buff, length);
 
-	length = snprintf(buff, BUF_LEN, "%f\n", 333.333f) + 1;
+	uint32_t length = snprintf(buff, BUF_LEN, "%f\n", 333.333f) + 1;
 	// buff[length - 1] = '\n';
 
 	sd_log_to_file(buff, length);

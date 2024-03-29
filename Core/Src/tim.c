@@ -454,9 +454,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 
 		// check if timer is initialized
-		if(ICValue != 0)
-		{
-			sd_switch_log();
+		if(ICValue != 0) {
+			// sd_switch_log();
 		}
 	}
 

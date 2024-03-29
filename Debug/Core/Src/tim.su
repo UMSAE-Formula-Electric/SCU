@@ -7,4 +7,4 @@
 ../Core/Src/tim.c:361:6:HAL_TIM_IC_MspDeInit	16	static
 ../Core/Src/tim.c:423:6:HAL_TIM_Base_MspDeInit	16	static
 ../Core/Src/tim.c:449:6:HAL_TIM_IC_CaptureCallback	24	static
-../Core/Src/tim.c:502:10:Get_TIM	4	static
+../Core/Src/tim.c:500:10:Get_TIM	4	static
