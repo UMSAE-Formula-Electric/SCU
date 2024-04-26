@@ -54,7 +54,10 @@ Core/Src/wheel_speed.o: ../Core/Src/wheel_speed.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h \
  ../Middlewares/Third_Party/FatFs/src/ff.h \
  ../Middlewares/Third_Party/FatFs/src/integer.h ../FATFS/Target/ffconf.h \
- ../Core/Inc/main.h
+ ../Core/Inc/main.h ../Core/Inc/sd_card.h ../FATFS/App/fatfs.h \
+ ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h \
+ ../Middlewares/Third_Party/FatFs/src/diskio.h \
+ ../Middlewares/Third_Party/FatFs/src/ff.h ../FATFS/Target/user_diskio.h
 ../Core/Inc/wheel_speed.h:
 ../Core/Inc/tim.h:
 ../Core/Inc/main.h:
@@ -114,3 +117,9 @@ Core/Src/wheel_speed.o: ../Core/Src/wheel_speed.c \
 ../Middlewares/Third_Party/FatFs/src/integer.h:
 ../FATFS/Target/ffconf.h:
 ../Core/Inc/main.h:
+../Core/Inc/sd_card.h:
+../FATFS/App/fatfs.h:
+../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h:
+../Middlewares/Third_Party/FatFs/src/diskio.h:
+../Middlewares/Third_Party/FatFs/src/ff.h:
+../FATFS/Target/user_diskio.h:

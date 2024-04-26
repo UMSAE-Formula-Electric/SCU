@@ -9,7 +9,6 @@
 "./Core/Src/main.o"
 "./Core/Src/rtc.o"
 "./Core/Src/sd_card.o"
-"./Core/Src/sd_card2.o"
 "./Core/Src/shock_pot.o"
 "./Core/Src/spi.o"
 "./Core/Src/stm32f4xx_hal_msp.o"

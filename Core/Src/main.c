@@ -28,12 +28,12 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "sd_card.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdarg.h>
 #include <stdio.h>
-#include "sd_card2.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,6 +78,7 @@ uint8_t isCardInserted() {
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -116,43 +117,40 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
-  // Init_SD_Card();
-  sd_init();
+  SD_Init();
+
 
   /*
-  FRESULT fres_mount = sd_mount();
+  FRESULT fres;
 
-  // DSTATUS dres = disk_status(0);
-
-  FRESULT fres_open_file = sd_open_log_file();
-  */
-
-  //char start_time[20] = get_time();
-
-  for(int i = 0; i < 1910; i++) {
+  for(int i = 0; i < 1000; i++) {
 	#define BUF_LEN 21
 	char buff[BUF_LEN];
 
-	uint32_t length = snprintf(buff, BUF_LEN, "%f\n", 333.333f) + 1;
+	//uint32_t length = snprintf(buff, BUF_LEN, "%f\n", 333.333f) + 1;
 
-	sd_log_to_file(buff, length);
+	fres = sd_log_to_file(get_time(), 20);
+	fres = sd_log_to_file("\n", 2);
 
 	//log_error(BATTERY_VOLTAGE_LOW, NONE, NULL);
+  };
+   */
+
+  /*
+  for(int i = 0; i < 1000; i++) {
+	  StartSDCardLogTask("Test", 5);
   }
-
-  //char end_time[20] = get_time();
-
-//  sd_eject();
-
+  */
   /* USER CODE END 2 */
 
-  /* Call init function for freertos objects (in freertos.c) */
+  /* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)

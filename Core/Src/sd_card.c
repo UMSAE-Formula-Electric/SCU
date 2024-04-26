@@ -1,462 +1,153 @@
 /*
- * 	sd_card.c
+ * sd_card2.c
  *
- *  Created on: Jan 6, 2021
- *      Author: Blane Cypurda
- *      Desc: 	RTOS tasks and functions related to operating logging, reading and writing
- *      		to the SD card, within the context of the operating system.
- *
- *		Notes for use of API: 	- Maximum 2 sequential requests queued for logging per loop of RTOS task
- *								-
- *
- *
+ *  Created on: Mar 3, 2024
+ *      Author: niko
  */
 
+#include "fatfs.h"
+#include "FreeRTOS.h"
+#include "string.h"
 
-#include "sd_card.h"
-#include "ff.h"
-#include "task.h"
+#define LOG_FILE "LOG_%u.txt"
 
-//FATFS
-static FATFS fs;							// 	File System
-static FIL fil[FS_MAX_CONCURRENT_FILES];	// 	array of file objects
-static BYTE work[FF_BUFFER_SIZE];			//	working buffer		//TODO: decide what to do with this
-static UINT bw;								//	bytes written
-static UINT br;								// 	bytes read
-static FRESULT f_res;						//	function result
-static DIR dir;								// 	current directory
+// How many writes are allowed to be buffered before we force them to be written to a file
+#define WRITES_UNTIL_SYNC 100
 
+#define SD_REQUEST_MAX_MESSAGE_LENGTH 64
 
+typedef struct {
+	 uint32_t length;
+	 char message[SD_REQUEST_MAX_MESSAGE_LENGTH];
+} SDRequest;
 
-//	Operation modes of SD card
-typedef enum{
-	Read,
-	Write,
-	Sync,
-	Eject
-}SD_Request_Type;
+#define SD_QUEUE_SIZE sizeof(SDRequest)
+#define SD_QUEUE_LENGTH 128
 
-//Data being sent through the Queue
-typedef struct{
+static StaticQueue_t xSD_Card_Queue_Static;
+QueueHandle_t xSD_Card_Queue;
+uint8_t xSD_Card_Queue_Storage[SD_QUEUE_SIZE * SD_QUEUE_LENGTH];
 
-	SD_Request_Type type;		//	Whether to read or write from the SD
-	FileEnum fileName;			// 	File to write to
-	int32_t size;				// 	Number of Bytes to Read or Bytes to write
-	char *buff;				// 	pointer to a string to be written or a data buffer to store what is read
+FATFS FatFs; 	//Fatfs handle
+FIL logFile; 	//File handle
 
-}SD_Request;	// end struct
+uint32_t write_count = 0; // how many writes have occured since we've synced them
+uint32_t log_index = 0;
 
-//RTOS
-#define SD_GATEKEEPER_TASK_STACK_SIZE			256		// stack size of gatekeeper task
-#define SD_SYNC_TASK_STACK_SIZE					128		// stack size of sync task
-#define SD_GATEKEEPER_TASK_PRIORITY				osPriorityRealtime		//priority of each task
-#define SD_SYNC_TASK_PRIORITY					osPriorityLow			//priority of each task
+uint32_t sd_is_filename_free(char *filename) {
+	FILINFO info;
+	FRESULT fres = f_stat(filename, &info);
 
-//RTOS STATIC DEFS
-#define SD_QUEUE_LEN 					6							// length of queue	(queue planned on being a mailbox, 3 is to make sure we dont lose requests)
-#define SD_QUEUE_SIZE 					sizeof(SD_Request)			// size of a pointer to a string
-#define SD_LOG_MSG_SPACING				4							// size of the newLine string
-#define SD_SYNC_ERROR_CHECK_TIMEOUT		100							// How long to wait to check with error with gatekeeper / min period of sync requests
+	return fres == FR_NO_FILE;
+}
 
-#define SD_LOGFILE_STRING				"LOG_FILE.txt"		// String of the log file to format
+FRESULT sd_mount(void) {
+	return f_mount(&FatFs, "", 1);
+}
 
+FRESULT sd_open_log_file(void) {
+	FRESULT fres = FR_NOT_READY;
 
-// Compiler optimizations should make these not just sit in RAM
+	char LOG_BUFFER[64] = {0};
 
-									// was originally "LOGS" instead of directory
-//static const char LOG_DIR_NAME[] = "C:\\cube files\\SD_CARD_OUTPUT_FOLDER";
-static const char LOG_DIR_NAME[] = "LOGS"; // directory to store the error log
-static char LOG_FILE_NAME[] = SD_LOGFILE_STRING;			// Name for the error log file
-static const char newLine[] = "\n";	// Space out messages written
+	do {
+		LOG_BUFFER[0] = '\0';
+		snprintf(LOG_BUFFER, 64, LOG_FILE, log_index++);
+	}while(!sd_is_filename_free(LOG_BUFFER));
 
+	fres = f_open(&logFile, LOG_BUFFER, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
 
-//SD Card RTOS Task Data
-static StaticQueue_t xSD_Card_Queue_Static;						// Queue for things to write to the SD card.
-QueueHandle_t xSD_Card_Queue;									// Handle for the static queue
-uint8_t xSD_Card_Queue_Storage[SD_QUEUE_LEN * SD_QUEUE_SIZE];	// Storage for the static queue
+	return fres;
+}
 
+FRESULT sd_init(void) {
+	FRESULT fres = sd_mount();
+
+	if(fres == FR_OK) {
+		fres = sd_open_log_file();
+	}
+
+	return fres;
+}
 
 
-//	Initializes the SD card
-// 	Creates the static objects related to the RTOS task's queue.
-void Init_SD_Card(){
+FRESULT sd_log_to_file(char *buff, UINT n) {
+	UINT bytesWritten;
+	FRESULT fres = f_write(&logFile, buff, n, &bytesWritten);
 
-	// Create a Queue for the SD Card logging RTOS Task before the scheduler starts
-	xSD_Card_Queue = xQueueCreateStatic(SD_QUEUE_LEN,
+	if(fres == FR_OK) {
+		write_count++;
+		if(write_count % WRITES_UNTIL_SYNC == 0) { // check if time to sync
+			f_sync(&logFile); // sync, if we didn't do this file write wouldn't be pushed to the sd card and we've have to close the file to write them
+			write_count = 0;
+		}
+	}
+
+	return fres;
+}
+
+/*
+FRESULT sd_switch_log(void) {
+	FRESULT fres = f_close(&logFile);
+
+	if(fres == FR_OK) {
+		fres = sd_open_log_file();
+	}
+
+	return fres;
+}
+*/
+
+FRESULT sd_eject(void) {
+	FRESULT fres = f_close(&logFile);
+
+	if(fres == FR_OK) {
+		fres = f_mount(NULL, "", 0); // unmount fat fs
+	}
+
+	return fres;
+}
+
+void SD_Init(void) {
+	xSD_Card_Queue = xQueueCreateStatic(SD_QUEUE_LENGTH,
 										SD_QUEUE_SIZE,
 										xSD_Card_Queue_Storage,
 										&xSD_Card_Queue_Static);
 
-	configASSERT(xSD_Card_Queue);	// xSD_Card_Queue_Storage was not NULL so xQueue should not be NULL.
+	configASSERT(xSD_Card_Queue);
 
-}// Init_SD_Card
-
-
-//To be called from wherever tasks are being created within the RTOS
-void Init_SD_RTOS_Tasks(){
-
-	//Gatekeeper
-	 /*xSD_Card_Gatekeeper_Handle = xTaskCreateStatic(	StartGateKeeperTask,
-														"SD_Gatekeeper",
-														256,
-														NULL,
-														SD_GATEKEEPER_TASK_PRIORITY,
-														xSD_Card_Gatekeeper_Stack,
-														&xSD_Card_Gatekeeper_Task_Buffer);	// Create static task for Logging to the SD_Card
-	 */
-	 //Sync Task
-	/*xSD_Card_Sync_Handle = xTaskCreateStatic(	StartSync,
-												"SD_Sync",
-												SD_SYNC_TASK_STACK_SIZE,
-												NULL,
-												SD_SYNC_TASK_PRIORITY,
-												xSD_Sync_Stack,
-												&xSD_Sync_Task_Buffer);	// Create static task for Logging to the SD_Card
-	*/
-	/*
-	xSD_Card_Test_Handle = xTaskCreateStatic(	TestSenderTask,
-												"SD_Test2",
-												256,
-												NULL,
-												osPriorityNormal,
-												xSD_Test_Stack,
-												&xSD_Test_Task_Buffer);	// Create static task for Logging to the SD_Card
-	*/
-
-
-}//init RTOS tasks
-
-
-//Private functions	**********************************************************************
-
-//	Read from the SD card
-// 	For now, will start from beginning of file and read btr num of bytes from there.
-// 	Variables can be static in this function as only one instance of them should run at once within the
-// 	SD_Gatekeeper task
-//TODO: More extensive error checking
-static _Bool SD_Task_Read(int32_t btr, char * buff, FileEnum fileNum){
-
-	//can get away with static as there will only be one instance of xSD_Card_Gatekeeper running
-	static FSIZE_t ofs;					//	offset from the beginning of the file
-	ofs = f_tell(&fil[fileNum]);		// Get file pointer of open file
-
-	f_res = f_lseek(&fil[fileNum], 0);	// point to beginning of file
-
-	f_res = f_read(&fil[fileNum], buff, btr, &br);		// Read the desired file
-
-	// If the read doesn't work
-	if(f_res != FR_OK){
-		return 0;
-	}
-
-	if(br < btr){
-		// Reached End of File during read
-		__NOP();
-	}//if
-
-	f_res = f_lseek(&fil[fileNum], ofs);	// point back to where we were in the file
-
-	f_res = f_puts("SD Logger - Read From SD Card\n\n", &fil[LogFile]);
-
-	return 1;
-
-}// SD Task Read
-
-//	Write a string to the current log file
-//	Should only be called by the SD_Card_Gatekeeper
-// int32_t btw (bytes to write)
-// char * str (string we are logging)
-// FileEnum fileNum (file number)
-static _Bool SD_Task_Write(int32_t btw, char * str, FileEnum fileNum){
-
-	static uint32_t len;			// length of string
-
-	if(btw == -1)
-		len = strlen(str);			// Dont need this feature but eh
-	else
-		len = btw;
-
-	// Writing brokey
-	if(f_res != FR_OK){
-		return 0;
-	}
-
-	f_res = f_write(&fil[fileNum], str, len, &bw);							// Write to SD buffer
-	f_res = f_write(&fil[fileNum], newLine, SD_LOG_MSG_SPACING, &bw);		// write to SD buffer
-
-	f_sync(&fil[fileNum]);
-
-	// Writing brokey
-	if(f_res != FR_OK){
-		return 0;
-	}
-	return 1;
-}// SD_Task_Write
-
-
-//Private functions end	**********************************************************************
-
-//Public Functions **********************************************************************
-
-
-// Log a message to the SD card
-// Each message passed through this function will be passed to the SD_Card queue
-
-// Passing a defined length of your string speeds up writing of your error message
-// HOWEVER: Passing -1 will make the task compute the length of your error string. (If you're lazy do that)
-
-// WARNING: Must be called within a RTOS Task
-_Bool SD_Log(char * msg, int32_t bytesToWrite){
-
-	BaseType_t ret;			// RTOS function returns
-	SD_Request request;		// Request Struct
-
-	request.type = Write;
-	request.buff = msg;
-	request.fileName = LogFile;
-	request.size = bytesToWrite;
-
-	ret = xQueueSendToBack(xSD_Card_Queue, &request, 0);	//Queue should never have more than one value in it thus wait = 0
-	if(ret != pdPASS){
-		//ERROR! Queue is full
-		return 0;
-	}
-	return 1;
-}//SD_ Log
-
-
-// Log a message to the SD card
-// Each message passed through this function will be passed to the SD_Card queue
-// WARNING: Use this function to call from Interrupt
-_Bool SD_Log_From_ISR(char * msg, int32_t bytesToWrite){
-
-	// should be able to get away with static as interrupts cannot be spliced
-	BaseType_t ret, pxHigherPriorityTaskWoken;			// RTOS function returns
-	SD_Request request;		// Request Struct
-
-
-		request.type = Write;
-		request.buff = msg;
-		request.fileName = LogFile;
-		request.size = bytesToWrite;
-
-	ret = xQueueSendToBackFromISR(	xSD_Card_Queue,
-									&request,
-									&pxHigherPriorityTaskWoken);
-
-	if(ret != pdPASS || pxHigherPriorityTaskWoken != pdTRUE){
-
-		//	Calling this function should trigger a context switch to SD_Card_Logger
-		// 	after the interrupt.
-		// 	^thus is pxHigherPriorityTaskWoken is not pdTRUE, that will not happen
-
-		// ret != pdPASS  means that the queue is full, which should not be the case
-
-		return 0;
-	}// if error occured
-
-	return 1;
+	sd_init();
+	sd_open_log_file();
 }
 
+#define DELAY 500
 
-// Request a read from the SD card
-_Bool SD_Read(char *readBuff, int32_t bytesToRead, FileEnum file){
+void StartSDCardLogTask(void const *argument) {
 
-	BaseType_t ret;			// RTOS function return
-	SD_Request request;		// Request Struct
+	FRESULT fres = FR_OK;
 
+	for(;;) {
+		SDRequest sd_req;
+		BaseType_t status = xQueueReceive(xSD_Card_Queue, &sd_req, portMAX_DELAY);
 
-	request.type = Read;
-	request.buff = readBuff;
-	request.fileName = file;
-	request.size = bytesToRead;
-
-	ret = xQueueSendToBack(xSD_Card_Queue, &request, 0);	//Queue should never have more than one value in it thus wait = 0
-	if(ret != pdPASS){
-		//ERROR! Queue is full
-		return 0;	//return
-	}
-
-	return 1;
-}
-
-
-//Eject the SD card
-_Bool SD_Eject(){
-
-	BaseType_t ret;			// RTOS function return
-	SD_Request request;		// Request Struct
-
-	request.type = Eject;	// Request to Eject
-
-	ret = xQueueSendToBack(xSD_Card_Queue, &request, 0);	//Queue should never have more than one value in it thus wait = 0
-	if(ret != pdPASS){
-		//ERROR! Queue is full
-		return 0;	//return
-	}
-	return 1;
-}
-
-
-//	Reads and Writes to the SD card upon request of other RTOS tasks.
-// 	This Task should have a higher priority within RTOS
-// 	than sender Tasks which report to this task through its Queue: xSD_Card_Queue
-//void StartGateKeeperTask(void* pvParameters){
-void StartGateKeeperTask(void const * argument){
-
-	static BaseType_t xStatus;					// storage for RTOS function returns
-	static SD_Request sd_req;					// request being sent to SD gatekeeper
-
-
-	f_res = f_mount(&fs, "", 1);		// mount the SD card's default drive immediately
-
-	if(f_res != FR_OK){
-		__NOP();	//debug
-		//Send message to Queue of Error Handler ()		//TODO: RTOS Error Handler
-	}//if mounted
-
-	f_res = f_mkdir(LOG_DIR_NAME);		// Make the directory if it hasn't been made
-//	f_res = f_chdir(LOG_DIR_NAME);		// open the logs directory
-
-//	f_res = f_open(&fil[LogFile], LOG_FILE_NAME, FA_READ | FA_WRITE | FA_OPEN_APPEND); (blane's code)
-	f_res = f_open(&fil[LogFile], LOG_FILE_NAME, FA_READ | FA_WRITE | FA_OPEN_APPEND);
-
-	f_res = f_sync(&fil[LogFile]);		// sync so we dont lose the opened file
-
-	for(;;){
-
-		if( uxQueueMessagesWaiting(xSD_Card_Queue) != 0 )
-		{
-			// Queue not empty when entering task!
-			// Error!
-			// Trace which task beat this task's priority?
-			__NOP();
-		}//if
-
-		// Wait for new request to be sent to the Queue
-		xStatus = xQueueReceive(xSD_Card_Queue, &sd_req, portMAX_DELAY);	//TODO: Make this timeout and check for errors (We should be constantly logging from BMS)
-
-		// If data received within time frame (if we decide to have a wait time)
-		if(xStatus == pdTRUE){
-
-			switch (sd_req.type) {
-				case Read:
-					SD_Task_Read(sd_req.size, sd_req.buff, sd_req.fileName);
-					//Let the SD Sync task know that it can request a sync now during downtime
-					xTaskNotifyGive(syncTaskHandle);
-					break;
-				case Write:
-					SD_Task_Write(sd_req.size, sd_req.buff, sd_req.fileName);
-					//Let the SD Sync task know that it can request a sync now during downtime
-					xTaskNotifyGive(syncTaskHandle);
-					break;
-				case Sync:
-					//Sync all files
-					for(int i=0; i<FS_MAX_CONCURRENT_FILES; i++){
-						f_sync(&fil[i]);
-					}
-					break;
-				case Eject:
-					//Close all files
-					for(int i=0; i<FS_MAX_CONCURRENT_FILES; i++){
-						f_close(&fil[i]);
-					}
-					f_mount(NULL, "" ,0);	//unmount the fs
-					vTaskSuspend(gateKeeperTaskHandle);	// Suspend this task
-					break;
-				default:
-					break;
-			}//switch
-
-		}//if xStatus
-
-	}//for
-
-}// xSD_Card_Gatekeeper
-
-
-
-// Low priority Task which will call the Gate-keeper to sync the write buffer to the sd card
-// TODO: Add Error Handling
-void StartSyncTask(void const * argument){
-
-	static BaseType_t ret;			// ret
-	static SD_Request syncRequest;		// Request Struct
-
-	uint32_t MS_WAIT = pdMS_TO_TICKS(SD_SYNC_ERROR_CHECK_TIMEOUT);		//	MS to wait for notification
-
-	syncRequest.type = Sync;	// Sync
-
-
-	for(;;){
-
-		ret = ulTaskNotifyTake(pdTRUE, MS_WAIT);		// enter blocked state and wait for a write
-
-		if(ret == pdTRUE){
-
-			ret = xQueueSendToBack(xSD_Card_Queue, &syncRequest, 0);	//Queue should never have more than one value in it thus wait = 0
-
-			if(ret != pdPASS){
-				//ERROR! Queue is full
-				__NOP();
-			}
-
-		}// if task was notified
-
-		else{
-			//Check for errors, did gatekeeper fail?
-			__NOP();
+		if(status == pdPASS) {
+			fres = sd_log_to_file(sd_req.message, sd_req.length);
 		}
 
-		vTaskDelay(MS_WAIT);	//Delay this much at least to sync again.
+		osDelay(pdMS_TO_TICKS(500));
 	}
-
-}//xSD_Sync task
-
-
-/*
-//Test
-void xTest_Sender_Task2(void * pvParameters){
-
-	_Bool gotQueued;			// store return value
-	uint32_t MS_WAIT = pdMS_TO_TICKS(1000);
-
-
-
-	for(;;){
-
-		gotQueued = SD_Log(test2, -1);	// Log
-
-		vTaskDelay(MS_WAIT);	// delay a second
-	}
-
 }
 
+_Bool SDCardLogWrite(char *message, uint32_t length) {
+	SDRequest req;
 
-//Test
-void xTest_Sender_Task1(void * pvParameters){
+	length = length > SD_REQUEST_MAX_MESSAGE_LENGTH ?
+			SD_REQUEST_MAX_MESSAGE_LENGTH : length;
 
-	_Bool gotQueued;			// store return value
-	uint32_t MS_WAIT = pdMS_TO_TICKS(1000);
+	strncpy(req.message, message, length);
+	req.length = length;
 
+	BaseType_t status = xQueueSendToBack(xSD_Card_Queue, &req, 0);
 
-
-	for(;;){
-
-		gotQueued = SD_Read(buff2, 10, LogFile);	// Read
-
-		vTaskDelay(MS_WAIT);	// delay a second
-	}
-
+	return status == pdPASS;
 }
-*/
-
-
-
-
-//HAL_Falling edge EXT interrupt to detect power loss
-//Finish writing to file
-
-
-
-//END_FILE

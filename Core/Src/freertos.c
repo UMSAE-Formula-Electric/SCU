@@ -57,12 +57,14 @@ osThreadId readFlowmeterTaskHandle;
 osThreadId canReceiverTaskHandle;
 osThreadId imuPacketProcessHandle;
 osThreadId readWheelSpeedsHandle;
+osThreadId sdCardLogTaskHandle;
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId readAdcTaskHandle;
 uint32_t readAdcTaskBuffer[ 512 ];
 osStaticThreadDef_t readAdcTaskControlBlock;
+osThreadId SDCardLogHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -71,6 +73,7 @@ osStaticThreadDef_t readAdcTaskControlBlock;
 
 void StartDefaultTask(void const * argument);
 extern void StartAdcDma(void const * argument);
+extern void StartSDCardLogTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -124,6 +127,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of readAdcTask */
   osThreadStaticDef(readAdcTask, StartAdcDma, osPriorityNormal, 0, 512, readAdcTaskBuffer, &readAdcTaskControlBlock);
   readAdcTaskHandle = osThreadCreate(osThread(readAdcTask), NULL);
+
+  /* definition and creation of SDCardLog */
+  osThreadDef(SDCardLog, StartSDCardLogTask, osPriorityNormal, 0, 512);
+  SDCardLogHandle = osThreadCreate(osThread(SDCardLog), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

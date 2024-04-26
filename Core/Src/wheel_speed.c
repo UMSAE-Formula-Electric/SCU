@@ -10,6 +10,7 @@
 #include "wheel_speed.h"
 #include "cmsis_os.h"
 #include "ff.h"
+#include "sd_card.h"
 
 // define statements
 #define WHEEL_DIAMETER		1							// In meters
@@ -45,8 +46,7 @@ void StartGetWheelSpeedTask(void const * argument){
 
 		/* TODO SCU#35 */
 		/* Logging Starts */
-
-
+		StartSDCardLogTask("Test", 5);
 		/* Logging Ends */
 
 		// reset counts

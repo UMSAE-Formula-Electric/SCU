@@ -1,61 +1,26 @@
 /*
- * sd_card.h
+ * sd_card2.h
  *
- *  Created on: Jan 6, 2021
- *      Author: Blane
+ *  Created on: Mar 3, 2024
+ *      Author: niko
  */
 
-#ifndef SD_CARD_H_
-#define SD_CARD_H_
+#ifndef INC_SD_CARD_H_
+#define INC_SD_CARD_H_
 
-#include "main.h"
-#include "FreeRTOS.h"
-#include "queue.h"
-#include <stdio.h>
-#include "string.h"
-#include "usart.h"
 #include "fatfs.h"
-#include "task.h"
-#include "semphr.h"
 
-// Files that can be accessed
-// Enum of open files
-typedef enum{
-	LogFile,
+/*
+FRESULT sd_init(void);
+FRESULT sd_mount(void);
+FRESULT sd_open_log_file(void);
+FRESULT sd_log_to_file(char*, UINT);
+FRESULT sd_switch_log(void);
+FRESULT sd_eject(void);
+*/
 
-}FileEnum;
+// void StartSDCardLogTask(void const *args);
+_Bool SDCardLogWrite(char *message, uint32_t length);
+void SD_Init(void);
 
-
-//FATFS
-#define FF_BUFFER_SIZE 				1024			//  Max size of a sector
-#define FS_MAX_CONCURRENT_FILES		3			// 	Max number of files
-#define FS_MAX_FILENAME_SIZE		32			// 	Max size of filenames
-
-//Logging
-
-
-
-//Externalizations
-extern QueueHandle_t xSD_Card_Queue;			// Handle for the static queue
-
-//External Functions
-void Init_SD_Card(void);
-void Init_SD_RTOS_Tasks(void);
-_Bool SD_Log(char * msg, int32_t bytesToWrite);
-_Bool SD_Log_From_ISR(char * msg, int32_t bytesToWrite);
-_Bool SD_Read(char readBuff[], int32_t bytesToRead, FileEnum file);
-
-
-//RTOS tasks
-void StartGateKeeperTask(void const * argument);
-void StartSyncTask(void const * argument);
-
-//TESTS
-void xTest_Sender_Task1(void * pvParameters);
-void xTest_Sender_Task2(void * pvParameters);
-
-// SD Card osThread IDs
-static osThreadId gateKeeperTaskHandle;
-static osThreadId syncTaskHandle;
-
-#endif /* SD_CARD_H_ */
+#endif /* INC_SD_CARD_H_ */
