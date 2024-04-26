@@ -134,7 +134,7 @@ int main(void)
 
 	//log_error(BATTERY_VOLTAGE_LOW, NONE, NULL);
   };
-   */
+  */
 
   /*
   for(int i = 0; i < 1000; i++) {

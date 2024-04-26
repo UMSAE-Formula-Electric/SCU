@@ -60,6 +60,7 @@ FRESULT sd_open_log_file(void) {
 	return fres;
 }
 
+/*
 FRESULT sd_init(void) {
 	FRESULT fres = sd_mount();
 
@@ -69,7 +70,7 @@ FRESULT sd_init(void) {
 
 	return fres;
 }
-
+*/
 
 FRESULT sd_log_to_file(char *buff, UINT n) {
 	UINT bytesWritten;
@@ -116,11 +117,15 @@ void SD_Init(void) {
 
 	configASSERT(xSD_Card_Queue);
 
-	sd_init();
-	sd_open_log_file();
-}
+	FRESULT fres = sd_mount();
 
-#define DELAY 500
+	if(fres == FR_OK) {
+		fres = sd_open_log_file(); // if mounted, open log file
+	}
+
+	//return fres;
+
+}
 
 void StartSDCardLogTask(void const *argument) {
 

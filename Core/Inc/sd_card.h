@@ -19,7 +19,6 @@ FRESULT sd_switch_log(void);
 FRESULT sd_eject(void);
 */
 
-// void StartSDCardLogTask(void const *args);
 _Bool SDCardLogWrite(char *message, uint32_t length);
 void SD_Init(void);
 

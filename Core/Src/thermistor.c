@@ -73,6 +73,9 @@ void StartReadTempTask(void const * argument){
 
 			sprintf(tempMsg, "%f\r\n", temperatures[3]);
 			HAL_USART_Transmit(&husart1, (uint8_t *) tempMsg, strlen(tempMsg), 10);
+
+			SDCardLogWrite("Thermistor Log", 15);
+
 			/* Logging Ends */
 		}
 

@@ -46,7 +46,7 @@ void StartGetWheelSpeedTask(void const * argument){
 
 		/* TODO SCU#35 */
 		/* Logging Starts */
-		StartSDCardLogTask("Test", 5);
+		SDCardLogWrite("Wheel Speed Log", 16);
 		/* Logging Ends */
 
 		// reset counts

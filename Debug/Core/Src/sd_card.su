@@ -1,9 +1,8 @@
 ../Core/Src/sd_card.c:37:10:sd_is_filename_free	48	static
 ../Core/Src/sd_card.c:44:9:sd_mount	8	static
 ../Core/Src/sd_card.c:48:9:sd_open_log_file	80	static
-../Core/Src/sd_card.c:63:9:sd_init	16	static
-../Core/Src/sd_card.c:74:9:sd_log_to_file	24	static
-../Core/Src/sd_card.c:101:9:sd_eject	16	static
-../Core/Src/sd_card.c:111:6:SD_Init	24	static,ignoring_inline_asm
-../Core/Src/sd_card.c:125:6:StartSDCardLogTask	96	static
-../Core/Src/sd_card.c:141:7:SDCardLogWrite	88	static
+../Core/Src/sd_card.c:75:9:sd_log_to_file	24	static
+../Core/Src/sd_card.c:102:9:sd_eject	16	static
+../Core/Src/sd_card.c:112:6:SD_Init	24	static,ignoring_inline_asm
+../Core/Src/sd_card.c:130:6:StartSDCardLogTask	96	static
+../Core/Src/sd_card.c:146:7:SDCardLogWrite	88	static
