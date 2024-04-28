@@ -118,7 +118,7 @@ int main(void) {
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
   SD_Init();
 #ifdef DO_SD_CARD_BENCHMARK
-  SD_Benchmark_Init(250);
+  SD_Benchmark_Init(8000);
 #endif
 
   /*

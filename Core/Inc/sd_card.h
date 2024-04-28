@@ -11,7 +11,7 @@
 #include "fatfs.h"
 
 // if this is defined a benchmark test will be created and done, disable this in the final thing
-#define DO_SD_CARD_BENCHMARK
+// #define DO_SD_CARD_BENCHMARK
 /*
 FRESULT sd_init(void);
 FRESULT sd_mount(void);
