@@ -8,6 +8,7 @@
 #include "fatfs.h"
 #include "FreeRTOS.h"
 #include "string.h"
+#include "sd_card.h"
 
 #define LOG_FILE "LOG_%u.txt"
 
@@ -16,13 +17,20 @@
 
 #define SD_REQUEST_MAX_MESSAGE_LENGTH 64
 
+typedef enum {
+	SDREQUEST_WRITE,
+	SDREQUEST_SYNC,
+} SDRequestType;
+
 typedef struct {
-	 uint32_t length;
-	 char message[SD_REQUEST_MAX_MESSAGE_LENGTH];
+	SDRequestType type;
+	uint32_t length;
+	char message[SD_REQUEST_MAX_MESSAGE_LENGTH];
 } SDRequest;
 
 #define SD_QUEUE_SIZE sizeof(SDRequest)
-#define SD_QUEUE_LENGTH 128
+#define SD_QUEUE_LENGTH 512
+//#define SD_QUEUE_LENGTH 128
 
 static StaticQueue_t xSD_Card_Queue_Static;
 QueueHandle_t xSD_Card_Queue;
@@ -34,18 +42,50 @@ FIL logFile; 	//File handle
 uint32_t write_count = 0; // how many writes have occured since we've synced them
 uint32_t log_index = 0;
 
-uint32_t sd_is_filename_free(char *filename) {
+uint32_t SDCardIsFilenameFree(char *filename) {
 	FILINFO info;
 	FRESULT fres = f_stat(filename, &info);
 
 	return fres == FR_NO_FILE;
 }
 
-FRESULT sd_mount(void) {
+
+
+// Write n chars 1 at at time
+void SDCardBenchmark(int n) {
+
+	SDCardSync(); // Sync first so we start with a clean slate
+
+	int start = HAL_GetTick();
+
+	for(int i = 0; i < n; i++) {
+
+		SDCardWrite("This is a test\n", 15);
+
+	}
+
+	SDCardSync(); // Sync at and end to force all writes, we're done counting time now
+
+	int end = HAL_GetTick();
+	int total_ticks = end - start;
+
+	char total_message[256];
+
+	int length = snprintf(total_message, 256, "\nTotal Ticks: %d\n", total_ticks) + 1;
+
+	SDCardWrite(total_message, 256);
+
+	SDCardSync(); // Force last message to be written
+
+}
+
+// "Do" functions are functions that handle internal stuff of the sd card
+
+FRESULT DoSDCardMount(void) {
 	return f_mount(&FatFs, "", 1);
 }
 
-FRESULT sd_open_log_file(void) {
+FRESULT DoSDCardOpenFile(void) {
 	FRESULT fres = FR_NOT_READY;
 
 	char LOG_BUFFER[64] = {0};
@@ -53,26 +93,14 @@ FRESULT sd_open_log_file(void) {
 	do {
 		LOG_BUFFER[0] = '\0';
 		snprintf(LOG_BUFFER, 64, LOG_FILE, log_index++);
-	}while(!sd_is_filename_free(LOG_BUFFER));
+	}while(!SDCardIsFilenameFree(LOG_BUFFER));
 
 	fres = f_open(&logFile, LOG_BUFFER, FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
 
 	return fres;
 }
 
-/*
-FRESULT sd_init(void) {
-	FRESULT fres = sd_mount();
-
-	if(fres == FR_OK) {
-		fres = sd_open_log_file();
-	}
-
-	return fres;
-}
-*/
-
-FRESULT sd_log_to_file(char *buff, UINT n) {
+FRESULT DoSDCardWrite(char *buff, UINT n) {
 	UINT bytesWritten;
 	FRESULT fres = f_write(&logFile, buff, n, &bytesWritten);
 
@@ -87,19 +115,14 @@ FRESULT sd_log_to_file(char *buff, UINT n) {
 	return fres;
 }
 
-/*
-FRESULT sd_switch_log(void) {
-	FRESULT fres = f_close(&logFile);
-
-	if(fres == FR_OK) {
-		fres = sd_open_log_file();
-	}
-
+// forces sd to sync, aka write uncommited changes to sd card
+FRESULT DoSDSync(void) {
+	FRESULT fres = f_sync(&logFile);
 	return fres;
 }
-*/
 
-FRESULT sd_eject(void) {
+
+FRESULT DoSDEject(void) {
 	FRESULT fres = f_close(&logFile);
 
 	if(fres == FR_OK) {
@@ -117,17 +140,17 @@ void SD_Init(void) {
 
 	configASSERT(xSD_Card_Queue);
 
-	FRESULT fres = sd_mount();
+	FRESULT fres = DoSDCardMount();
 
 	if(fres == FR_OK) {
-		fres = sd_open_log_file(); // if mounted, open log file
+		fres = DoSDCardOpenFile(); // if mounted, open log file
 	}
 
 	//return fres;
 
 }
 
-void StartSDCardLogTask(void const *argument) {
+void StartSDCardTask(void const *argument) {
 
 	FRESULT fres = FR_OK;
 
@@ -136,15 +159,28 @@ void StartSDCardLogTask(void const *argument) {
 		BaseType_t status = xQueueReceive(xSD_Card_Queue, &sd_req, portMAX_DELAY);
 
 		if(status == pdPASS) {
-			fres = sd_log_to_file(sd_req.message, sd_req.length);
+
+			switch(sd_req.type) {
+			case SDREQUEST_WRITE:
+				fres = DoSDCardWrite(sd_req.message, sd_req.length);
+			case SDREQUEST_SYNC:
+				fres = DoSDSync();
+			default:
+				break; // maybe some sort of error checking here
+			}
 		}
 
-		osDelay(pdMS_TO_TICKS(500));
+		// osDelay(pdMS_TO_TICKS(500));
 	}
 }
 
-_Bool SDCardLogWrite(char *message, uint32_t length) {
+// These functions queue up tasks that call their underlying implementations
+
+// Queue up a write
+_Bool SDCardWrite(char *message, uint32_t length) {
 	SDRequest req;
+
+	req.type = SDREQUEST_WRITE;
 
 	length = length > SD_REQUEST_MAX_MESSAGE_LENGTH ?
 			SD_REQUEST_MAX_MESSAGE_LENGTH : length;
@@ -156,3 +192,16 @@ _Bool SDCardLogWrite(char *message, uint32_t length) {
 
 	return status == pdPASS;
 }
+
+// Queues up a sync
+_Bool SDCardSync(void) {
+	SDRequest req;
+
+	req.type = SDREQUEST_SYNC;
+	req.length = 0;
+
+	BaseType_t status = xQueueSendToBack(xSD_Card_Queue, &req, 0);
+
+	return status == pdPASS;
+}
+

@@ -73,7 +73,7 @@ osThreadId SDCardLogHandle;
 
 void StartDefaultTask(void const * argument);
 extern void StartAdcDma(void const * argument);
-extern void StartSDCardLogTask(void const * argument);
+extern void StartSDCardTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -129,7 +129,7 @@ void MX_FREERTOS_Init(void) {
   readAdcTaskHandle = osThreadCreate(osThread(readAdcTask), NULL);
 
   /* definition and creation of SDCardLog */
-  osThreadDef(SDCardLog, StartSDCardLogTask, osPriorityNormal, 0, 512);
+  osThreadDef(SDCardLog, StartSDCardTask, osPriorityNormal, 0, 512);
   SDCardLogHandle = osThreadCreate(osThread(SDCardLog), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

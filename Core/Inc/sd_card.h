@@ -19,7 +19,8 @@ FRESULT sd_switch_log(void);
 FRESULT sd_eject(void);
 */
 
-_Bool SDCardLogWrite(char *message, uint32_t length);
+_Bool SDCardWrite(char *message, uint32_t length);
+_Bool SDCardSync(void);
 void SD_Init(void);
 
 #endif /* INC_SD_CARD_H_ */

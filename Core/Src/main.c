@@ -136,11 +136,10 @@ int main(void)
   };
   */
 
-  /*
-  for(int i = 0; i < 1000; i++) {
-	  StartSDCardLogTask("Test", 5);
-  }
-  */
+  SDCardBenchmark(1000);
+
+
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */

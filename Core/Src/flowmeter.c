@@ -42,7 +42,6 @@ void StartGetFlowrateTask(void const * argument){
 		flowrate = calculateFlowrate();		// calculates flowrate
 
 		/* TODO SCU#35 */
-		SDCardLogWrite("Flow Rate Log", 14);
 		/* Logging Starts */
 		time = get_time();
 		HAL_USART_Transmit(&husart1, (uint8_t *) time, strlen(time), 10);

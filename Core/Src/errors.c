@@ -64,7 +64,7 @@ bool log_error(ERR_TABLE error_type, DataType data_type, uint8_t *data) {
 
 	snprintf(to_log, BUF_SIZE, "%d %d %d\n", log_level, error_type, data_type);
 
-	sd_log_to_file(to_log, BUF_SIZE);
+	DoSDCardWrite(to_log, BUF_SIZE);
 
 	return true;
 }
