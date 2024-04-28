@@ -29,8 +29,7 @@ typedef struct {
 } SDRequest;
 
 #define SD_QUEUE_SIZE sizeof(SDRequest)
-#define SD_QUEUE_LENGTH 512
-//#define SD_QUEUE_LENGTH 128
+#define SD_QUEUE_LENGTH 128
 
 static StaticQueue_t xSD_Card_Queue_Static;
 QueueHandle_t xSD_Card_Queue;
@@ -52,6 +51,7 @@ uint32_t SDCardIsFilenameFree(char *filename) {
 
 
 // Write n chars 1 at at time
+/*
 void SDCardBenchmark(int n) {
 
 	SDCardSync(); // Sync first so we start with a clean slate
@@ -59,8 +59,12 @@ void SDCardBenchmark(int n) {
 	int start = HAL_GetTick();
 
 	for(int i = 0; i < n; i++) {
-
-		SDCardWrite("This is a test\n", 15);
+		if(xSD_Card_Queue->uxMessagesWaiting > SD_QUEUE_LENGTH) {
+			SDCardWrite("x", 1);
+		}
+		else {
+			osDelay(pdMS_TO_TICKS(500));
+		}
 
 	}
 
@@ -78,6 +82,7 @@ void SDCardBenchmark(int n) {
 	SDCardSync(); // Force last message to be written
 
 }
+*/
 
 // "Do" functions are functions that handle internal stuff of the sd card
 
@@ -163,14 +168,16 @@ void StartSDCardTask(void const *argument) {
 			switch(sd_req.type) {
 			case SDREQUEST_WRITE:
 				fres = DoSDCardWrite(sd_req.message, sd_req.length);
+				break;
 			case SDREQUEST_SYNC:
 				fres = DoSDSync();
+				break;
 			default:
 				break; // maybe some sort of error checking here
 			}
 		}
 
-		// osDelay(pdMS_TO_TICKS(500));
+		//osDelay(pdMS_TO_TICKS(500));
 	}
 }
 

@@ -29,7 +29,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "sd_card.h"
-
+#include "sd_card_benchmark.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdarg.h>
@@ -76,8 +76,7 @@ uint8_t isCardInserted() {
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
-{
+int main(void) {
 
   /* USER CODE BEGIN 1 */
 
@@ -118,7 +117,9 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); 		// Start input capture
   HAL_TIM_IC_Start_IT(&htim12, TIM_CHANNEL_1); 		// Start input capture
   SD_Init();
-
+#ifdef DO_SD_CARD_BENCHMARK
+  SD_Benchmark_Init(250);
+#endif
 
   /*
   FRESULT fres;
@@ -135,10 +136,6 @@ int main(void)
 	//log_error(BATTERY_VOLTAGE_LOW, NONE, NULL);
   };
   */
-
-  SDCardBenchmark(1000);
-
-
 
   /* USER CODE END 2 */
 

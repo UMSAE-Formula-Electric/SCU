@@ -32,6 +32,7 @@
 #include "IMU.h"
 #include "wheel_speed.h"
 #include "sd_card.h"
+#include "sd_card_benchmark.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,14 +58,17 @@ osThreadId readFlowmeterTaskHandle;
 osThreadId canReceiverTaskHandle;
 osThreadId imuPacketProcessHandle;
 osThreadId readWheelSpeedsHandle;
-osThreadId sdCardLogTaskHandle;
+osThreadId sdCardLogHandle;
+#ifdef DO_SD_CARD_BENCHMARK
+osThreadId sdCardBenchmarkTaskHandle;
+#endif
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId readAdcTaskHandle;
 uint32_t readAdcTaskBuffer[ 512 ];
 osStaticThreadDef_t readAdcTaskControlBlock;
-osThreadId SDCardLogHandle;
+//osThreadId sdCardLogHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -74,7 +78,8 @@ osThreadId SDCardLogHandle;
 void StartDefaultTask(void const * argument);
 extern void StartAdcDma(void const * argument);
 extern void StartSDCardTask(void const * argument);
-
+extern void StartSDCardTask(void const * argument);
+extern void StartSDCardBenchmark(void const * argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
@@ -130,7 +135,12 @@ void MX_FREERTOS_Init(void) {
 
   /* definition and creation of SDCardLog */
   osThreadDef(SDCardLog, StartSDCardTask, osPriorityNormal, 0, 512);
-  SDCardLogHandle = osThreadCreate(osThread(SDCardLog), NULL);
+  sdCardLogHandle = osThreadCreate(osThread(SDCardLog), NULL);
+
+#ifdef DO_SD_CARD_BENCHMARK
+  osThreadDef(SDCardBenchmark, StartSDCardBenchmark, osPriorityBelowNormal, 0, 512);
+  sdCardBenchmarkTaskHandle = osThreadCreate(osThread(SDCardBenchmark), NULL);
+#endif
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
