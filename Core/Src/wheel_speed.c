@@ -11,13 +11,15 @@
 #include "cmsis_os.h"
 
 // define statements
-#define WHEEL_DIAMETER		1							// In meters
-#define WHEEL_CIRCUMFERENCE (WHEEL_DIAMETER * 3.14159)	// In meters
-#define NUM_TEETH			10							// number of teeth on rotary encoder
+#define WHEEL_DIAMETER		18.1										// In inches
+#define WHEEL_CIRCUMFERENCE (WHEEL_DIAMETER * PI * INCHES_TO_METERS)	// In meters
+#define INCHES_TO_METERS	0.0254
+#define PI					3.14159
+#define NUM_TEETH			42							// number of teeth on rotary encoder
 
 #define DELAY 500										// time in ms
 
-static const double conversionFactor = (1000/DELAY)*(1.0/1000.0);		// convert L/s to m^3/s
+static const double conversionFactor = (1/DELAY)*(1000.0);	// convert 1/ms to 1/s
 
 extern volatile int wheel_FL_pulse_count;
 extern volatile int wheel_FR_pulse_count;
